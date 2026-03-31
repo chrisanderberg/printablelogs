@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="printablelogs favicon">
+  <rect width="64" height="64" rx="10" fill="#ffffff" />
+  <rect x="12" y="10" width="40" height="44" rx="4" fill="none" stroke="#111111" stroke-width="3" />
+  <path d="M20 22h24M20 30h24M20 38h24M20 46h24" stroke="#111111" stroke-width="2.25" />
+  <path d="M35 18c1.5 1.6 3 3.3 4.5 5.3" stroke="#2d6cdf" stroke-width="2.5" fill="none" stroke-linecap="round" />
+</svg>

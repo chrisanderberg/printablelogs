@@ -1,0 +1,12 @@
+:root {
+  --bg: #f8f8f6;
+  --bg-elevated: #ffffff;
+  --text: #111111;
+  --text-muted: #555555;
+  --border: #d6d6d2;
+  --accent: #2d6cdf;
+  --accent-soft: #dce8ff;
+  --font-display: "Public Sans", "Helvetica Neue", sans-serif;
+  --font-body: "Source Serif 4", Georgia, serif;
+  --content-width: 68rem;
+}
