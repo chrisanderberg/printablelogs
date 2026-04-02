@@ -252,6 +252,8 @@ export function resolveLayout(templateInput: TemplateV1): ResolvedLayout {
   return {
     title: template.title,
     titleLines,
+    visibleMetricCount: widths.metricWidths.length,
+    hiddenMetricCount: widths.hiddenMetricCount,
     pageSize: template.layout.pageSize,
     orientation: template.layout.orientation,
     timeGranularity: template.timeGranularity,

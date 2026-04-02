@@ -6,7 +6,6 @@ import {
   createMetricColumn,
   DEFAULT_TEMPLATE,
 } from '@/lib/template/defaults';
-import { normalizeTemplate } from '@/lib/template/normalize';
 import type { TemplateV1 } from '@/lib/template/types';
 import { PrintPreview } from './PrintPreview';
 import { TemplateForm } from './TemplateForm';
@@ -34,15 +33,7 @@ export function LogBuilderApp() {
   const [downloadError, setDownloadError] = useState<string | null>(null);
   const [isDownloading, setIsDownloading] = useState(false);
   const [isPending, startTransition] = useTransition();
-  const normalizedTemplate = normalizeTemplate(template);
-  const layout = resolveLayout(normalizedTemplate);
-  const visibleMetricCount = layout.columns.filter(
-    (column) => column.kind === 'metric'
-  ).length;
-  const hiddenMetricCount = Math.max(
-    normalizedTemplate.metricColumns.length - visibleMetricCount,
-    0
-  );
+  const layout = resolveLayout(template);
 
   function updateTemplate(updater: (current: TemplateV1) => TemplateV1) {
     startTransition(() => {
@@ -155,13 +146,13 @@ export function LogBuilderApp() {
           <div className="preview-panel__toolbar">
             <div>
               <p className="builder-label">Preview</p>
-              <h2>{normalizedTemplate.title}</h2>
+              <h2>{layout.title}</h2>
               <p className="builder-note">
                 {layout.orientation === 'landscape'
-                  ? `Landscape is active. ${visibleMetricCount} metric columns fit on this page.`
-                  : hiddenMetricCount > 0
-                    ? `Portrait is active. ${hiddenMetricCount} metric column${hiddenMetricCount === 1 ? '' : 's'} will be hidden unless you switch to landscape or remove some columns.`
-                    : `Portrait is active. ${visibleMetricCount} metric columns fit on this page.`}
+                  ? `Landscape is active. ${layout.visibleMetricCount} metric columns fit on this page.`
+                  : layout.hiddenMetricCount > 0
+                    ? `Portrait is active. ${layout.hiddenMetricCount} metric column${layout.hiddenMetricCount === 1 ? '' : 's'} will be hidden unless you switch to landscape or remove some columns.`
+                    : `Portrait is active. ${layout.visibleMetricCount} metric columns fit on this page.`}
               </p>
             </div>
             <div className="preview-panel__actions">

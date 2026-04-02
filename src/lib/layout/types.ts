@@ -28,6 +28,8 @@ export interface ResolvedLayoutWarning {
 export interface ResolvedLayout {
   title: string;
   titleLines: string[];
+  visibleMetricCount: number;
+  hiddenMetricCount: number;
   pageSize: PageSize;
   orientation: Orientation;
   timeGranularity: TimeGranularity;

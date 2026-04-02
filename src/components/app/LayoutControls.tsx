@@ -33,7 +33,7 @@ export function LayoutControls({
       </div>
       <fieldset className="segmented-field">
         <legend>Orientation</legend>
-        <div className="choice-grid" role="radiogroup" aria-label="Orientation">
+        <div className="choice-grid" role="group" aria-label="Orientation">
           <button
             type="button"
             className={`choice-card ${layout.orientation === 'portrait' ? 'is-active' : ''}`}
