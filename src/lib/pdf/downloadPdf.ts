@@ -10,16 +10,27 @@ function slugify(value: string): string {
 }
 
 export async function downloadPdf(layout: ResolvedLayout): Promise<void> {
-  const bytes = await renderPdf(layout);
-  const blob = new Blob([bytes], { type: 'application/pdf' });
-  const url = URL.createObjectURL(blob);
-  const anchor = document.createElement('a');
+  let url: string | null = null;
+  let anchor: HTMLAnchorElement | null = null;
 
-  anchor.href = url;
-  anchor.download = `${slugify(layout.title) || 'printable-log'}.pdf`;
-  document.body.append(anchor);
-  anchor.click();
-  anchor.remove();
+  try {
+    const bytes = await renderPdf(layout);
+    const blob = new Blob([bytes], { type: 'application/pdf' });
+    url = URL.createObjectURL(blob);
+    anchor = document.createElement('a');
 
-  window.setTimeout(() => URL.revokeObjectURL(url), 1000);
+    anchor.href = url;
+    anchor.download = `${slugify(layout.title) || 'printable-log'}.pdf`;
+    document.body.append(anchor);
+    anchor.click();
+  } catch (error) {
+    console.error('Failed to generate PDF:', error);
+    throw new Error('Please try again.');
+  } finally {
+    anchor?.remove();
+
+    if (url) {
+      window.setTimeout(() => URL.revokeObjectURL(url as string), 1000);
+    }
+  }
 }

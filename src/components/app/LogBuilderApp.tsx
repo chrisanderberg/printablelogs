@@ -1,13 +1,17 @@
 import { useState, useTransition } from 'react';
 import { resolveLayout } from '@/lib/layout/resolveLayout';
 import { downloadPdf } from '@/lib/pdf/downloadPdf';
-import { DEFAULT_TEMPLATE } from '@/lib/template/defaults';
+import {
+  cloneMetricColumns,
+  createMetricColumn,
+  DEFAULT_TEMPLATE,
+} from '@/lib/template/defaults';
 import { normalizeTemplate } from '@/lib/template/normalize';
 import type { TemplateV1 } from '@/lib/template/types';
 import { PrintPreview } from './PrintPreview';
 import { TemplateForm } from './TemplateForm';
 
-function moveItem(values: string[], index: number, direction: -1 | 1) {
+function moveItem<T>(values: T[], index: number, direction: -1 | 1) {
   const nextIndex = index + direction;
 
   if (nextIndex < 0 || nextIndex >= values.length) {
@@ -22,8 +26,13 @@ function moveItem(values: string[], index: number, direction: -1 | 1) {
 }
 
 export function LogBuilderApp() {
-  const [template, setTemplate] = useState<TemplateV1>(DEFAULT_TEMPLATE);
+  const [template, setTemplate] = useState<TemplateV1>(() => ({
+    ...DEFAULT_TEMPLATE,
+    metricColumns: cloneMetricColumns(DEFAULT_TEMPLATE.metricColumns),
+  }));
   const [showExample, setShowExample] = useState(true);
+  const [downloadError, setDownloadError] = useState<string | null>(null);
+  const [isDownloading, setIsDownloading] = useState(false);
   const [isPending, startTransition] = useTransition();
   const normalizedTemplate = normalizeTemplate(template);
   const layout = resolveLayout(normalizedTemplate);
@@ -35,7 +44,21 @@ export function LogBuilderApp() {
   }
 
   async function handleDownload() {
-    await downloadPdf(layout);
+    setDownloadError(null);
+    setIsDownloading(true);
+
+    try {
+      await downloadPdf(layout);
+    } catch (error) {
+      console.error('PDF download failed:', error);
+      setDownloadError(
+        error instanceof Error
+          ? `The PDF could not be created right now. ${error.message}`
+          : 'The PDF could not be created right now. Try again in a moment.'
+      );
+    } finally {
+      setIsDownloading(false);
+    }
   }
 
   return (
@@ -53,7 +76,7 @@ export function LogBuilderApp() {
           <TemplateForm
             title={template.title}
             timeGranularity={template.timeGranularity}
-            metricHeaders={template.metricHeaders}
+            metricColumns={template.metricColumns}
             layout={template.layout}
             onTitleChange={(value) =>
               updateTemplate((current) => ({ ...current, title: value }))
@@ -61,29 +84,37 @@ export function LogBuilderApp() {
             onGranularityChange={(value) =>
               updateTemplate((current) => ({ ...current, timeGranularity: value }))
             }
-            onMetricChange={(index, value) =>
+            onMetricChange={(id, value) =>
               updateTemplate((current) => {
-                const metricHeaders = [...current.metricHeaders];
-                metricHeaders[index] = value;
-                return { ...current, metricHeaders };
+                const metricColumns = current.metricColumns.map((column) =>
+                  column.id === id ? { ...column, header: value } : column
+                );
+                return { ...current, metricColumns };
               })
             }
             onAddMetric={() =>
               updateTemplate((current) => ({
                 ...current,
-                metricHeaders: [...current.metricHeaders, `Metric ${current.metricHeaders.length + 1}`],
+                metricColumns: [
+                  ...current.metricColumns,
+                  createMetricColumn(`Metric ${current.metricColumns.length + 1}`),
+                ],
               }))
             }
-            onMoveMetric={(index, direction) =>
+            onMoveMetric={(id, direction) =>
               updateTemplate((current) => ({
                 ...current,
-                metricHeaders: moveItem(current.metricHeaders, index, direction),
+                metricColumns: moveItem(
+                  current.metricColumns,
+                  current.metricColumns.findIndex((column) => column.id === id),
+                  direction
+                ),
               }))
             }
-            onRemoveMetric={(index) =>
+            onRemoveMetric={(id) =>
               updateTemplate((current) => ({
                 ...current,
-                metricHeaders: current.metricHeaders.filter((_, itemIndex) => itemIndex !== index),
+                metricColumns: current.metricColumns.filter((column) => column.id !== id),
               }))
             }
             onPageSizeChange={(value) =>
@@ -132,9 +163,9 @@ export function LogBuilderApp() {
                 type="button"
                 className="primary-button"
                 onClick={() => void handleDownload()}
-                disabled={isPending}
+                disabled={isPending || isDownloading}
               >
-                Download PDF
+                {isDownloading ? 'Preparing PDF...' : 'Download PDF'}
               </button>
             </div>
           </div>
@@ -146,6 +177,12 @@ export function LogBuilderApp() {
                   {warning.message}
                 </p>
               ))}
+            </div>
+          )}
+
+          {downloadError && (
+            <div className="warning-stack" aria-live="polite">
+              <p className="warning-card">{downloadError}</p>
             </div>
           )}
 

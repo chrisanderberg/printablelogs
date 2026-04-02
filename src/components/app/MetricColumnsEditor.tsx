@@ -1,13 +1,15 @@
+import type { MetricColumn } from '@/lib/template/types';
+
 interface MetricColumnsEditorProps {
-  metricHeaders: string[];
-  onMetricChange: (index: number, value: string) => void;
+  metricColumns: MetricColumn[];
+  onMetricChange: (id: string, value: string) => void;
   onAddMetric: () => void;
-  onMoveMetric: (index: number, direction: -1 | 1) => void;
-  onRemoveMetric: (index: number) => void;
+  onMoveMetric: (id: string, direction: -1 | 1) => void;
+  onRemoveMetric: (id: string) => void;
 }
 
 export function MetricColumnsEditor({
-  metricHeaders,
+  metricColumns,
   onMetricChange,
   onAddMetric,
   onMoveMetric,
@@ -25,14 +27,14 @@ export function MetricColumnsEditor({
         </button>
       </div>
       <div className="metric-list">
-        {metricHeaders.map((header, index) => (
-          <div className="metric-row" key={`metric-${index}`}>
+        {metricColumns.map((metric, index) => (
+          <div className="metric-row" key={metric.id}>
             <label className="field">
               <span>Header {index + 1}</span>
               <input
                 type="text"
-                value={header}
-                onChange={(event) => onMetricChange(index, event.target.value)}
+                value={metric.header}
+                onChange={(event) => onMetricChange(metric.id, event.target.value)}
                 placeholder="Metric name"
               />
             </label>
@@ -40,7 +42,7 @@ export function MetricColumnsEditor({
               <button
                 type="button"
                 className="icon-button"
-                onClick={() => onMoveMetric(index, -1)}
+                onClick={() => onMoveMetric(metric.id, -1)}
                 disabled={index === 0}
               >
                 Up
@@ -48,16 +50,16 @@ export function MetricColumnsEditor({
               <button
                 type="button"
                 className="icon-button"
-                onClick={() => onMoveMetric(index, 1)}
-                disabled={index === metricHeaders.length - 1}
+                onClick={() => onMoveMetric(metric.id, 1)}
+                disabled={index === metricColumns.length - 1}
               >
                 Down
               </button>
               <button
                 type="button"
                 className="icon-button icon-button--danger"
-                onClick={() => onRemoveMetric(index)}
-                disabled={metricHeaders.length === 1}
+                onClick={() => onRemoveMetric(metric.id)}
+                disabled={metricColumns.length === 1}
               >
                 Remove
               </button>

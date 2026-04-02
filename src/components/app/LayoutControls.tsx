@@ -5,6 +5,9 @@ import type {
   TemplateLayout,
 } from '@/lib/template/types';
 
+const MIN_ROWS_PER_PAGE = 8;
+const MAX_ROWS_PER_PAGE = 48;
+
 interface LayoutControlsProps {
   layout: TemplateLayout;
   onPageSizeChange: (value: PageSize) => void;
@@ -55,10 +58,23 @@ export function LayoutControls({
           <span>Rows per page</span>
           <input
             type="number"
-            min={8}
-            max={48}
+            min={MIN_ROWS_PER_PAGE}
+            max={MAX_ROWS_PER_PAGE}
             value={layout.rowsPerPage}
-            onChange={(event) => onRowsPerPageChange(Number(event.target.value))}
+            onChange={(event) => {
+              const parsedValue = Number.parseInt(event.target.value, 10);
+
+              if (Number.isNaN(parsedValue)) {
+                return;
+              }
+
+              onRowsPerPageChange(
+                Math.min(
+                  MAX_ROWS_PER_PAGE,
+                  Math.max(MIN_ROWS_PER_PAGE, parsedValue)
+                )
+              );
+            }}
           />
         </label>
         <label className="field">

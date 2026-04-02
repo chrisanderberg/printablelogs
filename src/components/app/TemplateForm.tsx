@@ -1,11 +1,14 @@
-import type { TimeGranularity } from '@/lib/template/types';
+import type {
+  MetricColumn,
+  TimeGranularity,
+} from '@/lib/template/types';
 import { LayoutControls } from './LayoutControls';
 import { MetricColumnsEditor } from './MetricColumnsEditor';
 
 interface TemplateFormProps {
   title: string;
   timeGranularity: TimeGranularity;
-  metricHeaders: string[];
+  metricColumns: MetricColumn[];
   layout: {
     pageSize: 'letter' | 'a4';
     orientation: 'portrait' | 'landscape';
@@ -14,10 +17,10 @@ interface TemplateFormProps {
   };
   onTitleChange: (value: string) => void;
   onGranularityChange: (value: TimeGranularity) => void;
-  onMetricChange: (index: number, value: string) => void;
+  onMetricChange: (id: string, value: string) => void;
   onAddMetric: () => void;
-  onMoveMetric: (index: number, direction: -1 | 1) => void;
-  onRemoveMetric: (index: number) => void;
+  onMoveMetric: (id: string, direction: -1 | 1) => void;
+  onRemoveMetric: (id: string) => void;
   onPageSizeChange: (value: 'letter' | 'a4') => void;
   onOrientationChange: (value: 'portrait' | 'landscape') => void;
   onRowsPerPageChange: (value: number) => void;
@@ -65,7 +68,7 @@ export function TemplateForm(props: TemplateFormProps) {
       </div>
 
       <MetricColumnsEditor
-        metricHeaders={props.metricHeaders}
+        metricColumns={props.metricColumns}
         onMetricChange={props.onMetricChange}
         onAddMetric={props.onAddMetric}
         onMoveMetric={props.onMoveMetric}

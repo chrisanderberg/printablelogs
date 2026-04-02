@@ -1,4 +1,8 @@
-import { DEFAULT_TEMPLATE } from './defaults';
+import {
+  cloneMetricColumns,
+  DEFAULT_METRIC_COLUMNS,
+  DEFAULT_TEMPLATE,
+} from './defaults';
 import type { ResolvedTemplateColumn, TemplateV1 } from './types';
 
 const MIN_ROWS_PER_PAGE = 8;
@@ -9,17 +13,20 @@ function cleanMetricHeader(header: string): string {
 }
 
 export function normalizeTemplate(template: TemplateV1): TemplateV1 {
-  const metricHeaders = template.metricHeaders
-    .map(cleanMetricHeader)
-    .filter(Boolean);
+  const metricColumns = template.metricColumns
+    .map((column) => ({
+      id: column.id,
+      header: cleanMetricHeader(column.header),
+    }))
+    .filter((column) => Boolean(column.header));
 
   return {
     version: 1,
     title: template.title.trim() || DEFAULT_TEMPLATE.title,
     timeGranularity: template.timeGranularity,
-    metricHeaders: metricHeaders.length
-      ? metricHeaders
-      : DEFAULT_TEMPLATE.metricHeaders,
+    metricColumns: metricColumns.length
+      ? metricColumns
+      : cloneMetricColumns(DEFAULT_METRIC_COLUMNS),
     layout: {
       pageSize: template.layout.pageSize,
       orientation: template.layout.orientation,
@@ -33,13 +40,14 @@ export function normalizeTemplate(template: TemplateV1): TemplateV1 {
 }
 
 export function getResolvedColumns(
-  template: TemplateV1
+  template: TemplateV1,
+  metricCount: number = template.metricColumns.length
 ): ResolvedTemplateColumn[] {
   const timeHeader =
     template.timeGranularity === 'daily' ? 'Date' : 'Date / Time';
-  const metricColumns = template.metricHeaders.map((header, index) => ({
-    key: `metric-${index + 1}`,
-    header,
+  const metricColumns = template.metricColumns.slice(0, metricCount).map((column) => ({
+    key: column.id,
+    header: column.header,
     kind: 'metric' as const,
   }));
 

@@ -9,6 +9,8 @@ import {
 import type { ResolvedLayout } from '@/lib/layout/types';
 import { PDFDocument, StandardFonts, rgb } from 'pdf-lib';
 
+const TITLE_BASELINE_OFFSET = 12;
+
 function toPdfY(pageHeight: number, y: number): number {
   return pageHeight - y;
 }
@@ -23,7 +25,7 @@ export async function renderPdf(layout: ResolvedLayout): Promise<Uint8Array> {
 
   page.drawText(layout.title, {
     x: layout.contentBox.x,
-    y: toPdfY(layout.page.height, layout.contentBox.y - 16),
+    y: toPdfY(layout.page.height, layout.contentBox.y) + TITLE_BASELINE_OFFSET,
     font: sansBold,
     size: TITLE_FONT_SIZE,
     color: black,

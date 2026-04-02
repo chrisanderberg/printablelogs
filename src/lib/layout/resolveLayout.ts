@@ -44,7 +44,12 @@ function resolveColumnWidths(
   metricCount: number,
   preset: ColumnWidthPreset,
   isDaily: boolean
-): { timeWidth: number; metricWidths: number[]; notesWidth: number } {
+): {
+  timeWidth: number;
+  metricWidths: number[];
+  notesWidth: number;
+  hiddenMetricCount: number;
+} {
   const percentages = getWidthPercentages(preset, isDaily);
   let timeWidth = contentWidth * percentages.time;
   let notesWidth = contentWidth * percentages.notes;
@@ -65,22 +70,41 @@ function resolveColumnWidths(
       : [];
 
   if (metricWidths.some((width) => width < MIN_METRIC_COLUMN_WIDTH)) {
-    const targetMetricTotal = metricCount * MIN_METRIC_COLUMN_WIDTH;
-    const available = Math.max(contentWidth - targetMetricTotal, 0);
-    timeWidth = Math.max(Math.min(timeWidth, available * 0.45), MIN_TIME_COLUMN_WIDTH);
-    notesWidth = Math.max(contentWidth - targetMetricTotal - timeWidth, MIN_NOTES_COLUMN_WIDTH);
+    const totalMinWidth =
+      MIN_TIME_COLUMN_WIDTH +
+      MIN_NOTES_COLUMN_WIDTH +
+      metricCount * MIN_METRIC_COLUMN_WIDTH;
+    const availableMetricWidth = Math.max(
+      contentWidth - MIN_TIME_COLUMN_WIDTH - MIN_NOTES_COLUMN_WIDTH,
+      0
+    );
+    const visibleMetricCount = Math.min(
+      metricCount,
+      Math.floor(availableMetricWidth / MIN_METRIC_COLUMN_WIDTH)
+    );
+    const reservedMetricWidth = visibleMetricCount * MIN_METRIC_COLUMN_WIDTH;
+    const availableTimeWidth = Math.max(
+      contentWidth - MIN_NOTES_COLUMN_WIDTH - reservedMetricWidth,
+      0
+    );
 
-    const rebalancedMetricWidth =
-      metricCount > 0 ? Math.max((contentWidth - timeWidth - notesWidth) / metricCount, 0) : 0;
+    timeWidth = Math.min(MIN_TIME_COLUMN_WIDTH, availableTimeWidth);
+    const metricWidths = Array.from(
+      { length: visibleMetricCount },
+      () => MIN_METRIC_COLUMN_WIDTH
+    );
+    notesWidth = Math.max(contentWidth - timeWidth - reservedMetricWidth, 0);
 
     return {
       timeWidth,
-      metricWidths: Array.from({ length: metricCount }, () => rebalancedMetricWidth),
+      metricWidths,
       notesWidth,
+      hiddenMetricCount:
+        totalMinWidth > contentWidth ? metricCount - visibleMetricCount : 0,
     };
   }
 
-  return { timeWidth, metricWidths, notesWidth };
+  return { timeWidth, metricWidths, notesWidth, hiddenMetricCount: 0 };
 }
 
 export function resolveLayout(templateInput: TemplateV1): ResolvedLayout {
@@ -117,21 +141,23 @@ export function resolveLayout(templateInput: TemplateV1): ResolvedLayout {
     height: contentBox.height - headerBox.height - footerBox.height,
   };
   const rowHeight = bodyBox.height / template.layout.rowsPerPage;
-  const columns = getResolvedColumns(template);
-  const metricCount = template.metricHeaders.length;
+  const metricCount = template.metricColumns.length;
   const widths = resolveColumnWidths(
     contentBox.width,
     metricCount,
     template.layout.widthPreset,
     template.timeGranularity === 'daily'
   );
+  const columns = getResolvedColumns(template, widths.metricWidths.length);
 
   let currentX = contentBox.x;
-  const resolvedColumns: ResolvedLayoutColumn[] = columns.map((column, index) => {
+  let metricIndex = 0;
+  const resolvedColumns: ResolvedLayoutColumn[] = columns.map((column) => {
     let width = widths.timeWidth;
 
     if (column.kind === 'metric') {
-      width = widths.metricWidths[index - 1];
+      width = widths.metricWidths[metricIndex];
+      metricIndex += 1;
     }
 
     if (column.kind === 'notes') {
@@ -168,6 +194,14 @@ export function resolveLayout(templateInput: TemplateV1): ResolvedLayout {
     metricWidths: widths.metricWidths,
     notesWidth: widths.notesWidth,
   });
+
+  if (widths.hiddenMetricCount > 0) {
+    warnings.push({
+      id: 'metric-limit',
+      level: 'warning',
+      message: `Only the first ${widths.metricWidths.length} metric columns fit on this page. Remove a few metrics or switch to a wider layout to include the rest.`,
+    });
+  }
 
   return {
     title: template.title,
