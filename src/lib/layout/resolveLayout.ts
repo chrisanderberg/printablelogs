@@ -1,0 +1,196 @@
+import {
+  FOOTER_HEIGHT,
+  HEADER_HEIGHT,
+  INNER_GRID_WIDTH,
+  MIN_METRIC_COLUMN_WIDTH,
+  MIN_NOTES_COLUMN_WIDTH,
+  MIN_TIME_COLUMN_WIDTH,
+  OUTER_BORDER_WIDTH,
+  PAGE_MARGIN_INCHES,
+  POINTS_PER_INCH,
+  getPageDimensions,
+} from './constants';
+import { validateLayout } from './validation';
+import { getResolvedColumns, normalizeTemplate } from '../template/normalize';
+import type { ColumnWidthPreset, TemplateV1 } from '../template/types';
+import type { ResolvedLayout, ResolvedLayoutColumn } from './types';
+
+function getWidthPercentages(
+  preset: ColumnWidthPreset,
+  isDaily: boolean
+): { time: number; notes: number } {
+  if (preset === 'notes-heavy') {
+    return {
+      time: isDaily ? 0.15 : 0.18,
+      notes: 0.31,
+    };
+  }
+
+  if (preset === 'metrics-heavy') {
+    return {
+      time: isDaily ? 0.13 : 0.16,
+      notes: 0.2,
+    };
+  }
+
+  return {
+    time: isDaily ? 0.14 : 0.18,
+    notes: 0.26,
+  };
+}
+
+function resolveColumnWidths(
+  contentWidth: number,
+  metricCount: number,
+  preset: ColumnWidthPreset,
+  isDaily: boolean
+): { timeWidth: number; metricWidths: number[]; notesWidth: number } {
+  const percentages = getWidthPercentages(preset, isDaily);
+  let timeWidth = contentWidth * percentages.time;
+  let notesWidth = contentWidth * percentages.notes;
+
+  if (timeWidth < MIN_TIME_COLUMN_WIDTH) {
+    timeWidth = MIN_TIME_COLUMN_WIDTH;
+  }
+
+  if (notesWidth < MIN_NOTES_COLUMN_WIDTH) {
+    notesWidth = MIN_NOTES_COLUMN_WIDTH;
+  }
+
+  const remainingWidth = Math.max(contentWidth - timeWidth - notesWidth, 0);
+  const metricWidth = metricCount > 0 ? remainingWidth / metricCount : 0;
+  const metricWidths =
+    metricCount > 0
+      ? Array.from({ length: metricCount }, () => metricWidth)
+      : [];
+
+  if (metricWidths.some((width) => width < MIN_METRIC_COLUMN_WIDTH)) {
+    const targetMetricTotal = metricCount * MIN_METRIC_COLUMN_WIDTH;
+    const available = Math.max(contentWidth - targetMetricTotal, 0);
+    timeWidth = Math.max(Math.min(timeWidth, available * 0.45), MIN_TIME_COLUMN_WIDTH);
+    notesWidth = Math.max(contentWidth - targetMetricTotal - timeWidth, MIN_NOTES_COLUMN_WIDTH);
+
+    const rebalancedMetricWidth =
+      metricCount > 0 ? Math.max((contentWidth - timeWidth - notesWidth) / metricCount, 0) : 0;
+
+    return {
+      timeWidth,
+      metricWidths: Array.from({ length: metricCount }, () => rebalancedMetricWidth),
+      notesWidth,
+    };
+  }
+
+  return { timeWidth, metricWidths, notesWidth };
+}
+
+export function resolveLayout(templateInput: TemplateV1): ResolvedLayout {
+  const template = normalizeTemplate(templateInput);
+  const page = getPageDimensions(template.layout.pageSize, template.layout.orientation);
+  const margins = {
+    top: PAGE_MARGIN_INCHES.top * POINTS_PER_INCH,
+    right: PAGE_MARGIN_INCHES.right * POINTS_PER_INCH,
+    bottom: PAGE_MARGIN_INCHES.bottom * POINTS_PER_INCH,
+    left: PAGE_MARGIN_INCHES.left * POINTS_PER_INCH,
+  };
+  const contentBox = {
+    x: margins.left,
+    y: margins.top,
+    width: page.width - margins.left - margins.right,
+    height: page.height - margins.top - margins.bottom,
+  };
+  const headerBox = {
+    x: contentBox.x,
+    y: contentBox.y,
+    width: contentBox.width,
+    height: HEADER_HEIGHT,
+  };
+  const footerBox = {
+    x: contentBox.x,
+    y: contentBox.y + contentBox.height - FOOTER_HEIGHT,
+    width: contentBox.width,
+    height: FOOTER_HEIGHT,
+  };
+  const bodyBox = {
+    x: contentBox.x,
+    y: headerBox.y + headerBox.height,
+    width: contentBox.width,
+    height: contentBox.height - headerBox.height - footerBox.height,
+  };
+  const rowHeight = bodyBox.height / template.layout.rowsPerPage;
+  const columns = getResolvedColumns(template);
+  const metricCount = template.metricHeaders.length;
+  const widths = resolveColumnWidths(
+    contentBox.width,
+    metricCount,
+    template.layout.widthPreset,
+    template.timeGranularity === 'daily'
+  );
+
+  let currentX = contentBox.x;
+  const resolvedColumns: ResolvedLayoutColumn[] = columns.map((column, index) => {
+    let width = widths.timeWidth;
+
+    if (column.kind === 'metric') {
+      width = widths.metricWidths[index - 1];
+    }
+
+    if (column.kind === 'notes') {
+      width = widths.notesWidth;
+    }
+
+    const resolvedColumn = {
+      ...column,
+      x: currentX,
+      width,
+    };
+
+    currentX += width;
+    return resolvedColumn;
+  });
+
+  if (resolvedColumns.length > 0) {
+    const lastColumn = resolvedColumns[resolvedColumns.length - 1];
+    lastColumn.width = contentBox.x + contentBox.width - lastColumn.x;
+  }
+
+  const columnLines = [
+    contentBox.x,
+    ...resolvedColumns.map((column) => column.x + column.width),
+  ];
+  const rowLines = Array.from(
+    { length: template.layout.rowsPerPage + 1 },
+    (_, index) => bodyBox.y + index * rowHeight
+  );
+
+  const warnings = validateLayout({
+    rowHeight,
+    timeWidth: widths.timeWidth,
+    metricWidths: widths.metricWidths,
+    notesWidth: widths.notesWidth,
+  });
+
+  return {
+    title: template.title,
+    pageSize: template.layout.pageSize,
+    orientation: template.layout.orientation,
+    timeGranularity: template.timeGranularity,
+    widthPreset: template.layout.widthPreset,
+    page,
+    margins,
+    contentBox,
+    headerBox,
+    bodyBox,
+    footerBox,
+    columns: resolvedColumns,
+    rowsPerPage: template.layout.rowsPerPage,
+    rowHeight,
+    columnLines,
+    rowLines,
+    warnings,
+  };
+}
+
+export const gridStrokeWidths = {
+  outer: OUTER_BORDER_WIDTH,
+  inner: INNER_GRID_WIDTH,
+};

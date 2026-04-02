@@ -1,35 +1,19 @@
 ---
 import SiteLayout from '../layouts/SiteLayout.astro';
+import { LogBuilderApp } from '../components/app/LogBuilderApp';
 ---
 
 <SiteLayout
   title="printablelogs"
-  description="Static scaffold for a print-first tracking-log generator."
+  description="Build print-ready tracking logs for analog-first workflows."
 >
-  <section class="hero container">
-    <p class="eyebrow">Main worktree scaffold</p>
-    <h1>Print-first project setup for printablelogs.</h1>
-    <p class="lede">
-      This repo is initialized for the future MVP: printable table-log
-      generation with clean PDF export. The actual generator UI and export logic
-      are intentionally not built yet.
-    </p>
-  </section>
+  <div class="builder-page container">
+    <LogBuilderApp client:load />
+  </div>
 </SiteLayout>
 
 <style>
-  .hero {
-    padding: 6rem 0 4rem;
-  }
-
-  .eyebrow {
-    color: var(--accent);
-    text-transform: uppercase;
-    letter-spacing: 0.14em;
-    margin-bottom: 1rem;
-  }
-
-  .lede {
-    max-width: 44rem;
+  .builder-page {
+    padding: 2.5rem 0 4rem;
   }
 </style>

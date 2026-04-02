@@ -11,17 +11,19 @@ import { REPO_ROOT } from '../lib/github';
     <p class="eyebrow">/ about</p>
     <h1>About printablelogs</h1>
     <p>
-      printablelogs is intended to make printable, handwriting-friendly tracking
-      sheets faster to generate than drawing them manually.
+      printablelogs is a print-first tool for making handwriting-friendly
+      tracking sheets faster than drawing them by hand.
     </p>
     <p>
-      The current repo is only a starter scaffold. It establishes the main
-      worktree, Astro structure, and product docs for future implementation
-      threads that will build the actual generator and PDF export flow.
+      The current MVP focuses on one job: configuring a table log, previewing it
+      as a printable page, and exporting a clean one-page PDF for Letter or A4
+      in portrait or landscape.
     </p>
     <p>
-      Planned requirements live in the root docs, and source will eventually
-      live on <a href={REPO_ROOT} target="_blank" rel="noreferrer">GitHub</a>.
+      The longer-term product vision includes digitization and visualization, but
+      those are intentionally out of scope for now. Planned requirements live in
+      the root docs, and source lives on
+      <a href={REPO_ROOT} target="_blank" rel="noreferrer"> GitHub</a>.
     </p>
   </section>
 </SiteLayout>

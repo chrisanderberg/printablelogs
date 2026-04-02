@@ -1,12 +1,21 @@
 :root {
-  --bg: #f8f8f6;
-  --bg-elevated: #ffffff;
-  --text: #111111;
-  --text-muted: #555555;
-  --border: #d6d6d2;
-  --accent: #2d6cdf;
-  --accent-soft: #dce8ff;
-  --font-display: "Public Sans", "Helvetica Neue", sans-serif;
-  --font-body: "Source Serif 4", Georgia, serif;
-  --content-width: 68rem;
+  --bg: #f4f1ea;
+  --bg-elevated: #fffdf8;
+  --bg-panel: rgba(255, 252, 245, 0.84);
+  --text: #181512;
+  --text-muted: #685d54;
+  --border: rgba(32, 27, 21, 0.15);
+  --border-strong: rgba(24, 21, 18, 0.3);
+  --accent: #2452a5;
+  --accent-soft: rgba(36, 82, 165, 0.1);
+  --accent-strong: #183a78;
+  --warning-bg: #fff1dc;
+  --warning-border: #d69534;
+  --shadow-soft: 0 22px 60px rgba(40, 29, 17, 0.12);
+  --shadow-card: 0 14px 36px rgba(43, 28, 14, 0.09);
+  --font-display: "Avenir Next Condensed", "Franklin Gothic Medium", "Arial Narrow", sans-serif;
+  --font-body: "Iowan Old Style", "Palatino Linotype", "Book Antiqua", serif;
+  --font-ui: "Avenir Next", "Segoe UI", sans-serif;
+  --font-ink: "Bradley Hand", "Segoe Print", "Comic Sans MS", cursive;
+  --content-width: 82rem;
 }
