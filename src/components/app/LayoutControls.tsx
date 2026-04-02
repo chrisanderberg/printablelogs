@@ -31,6 +31,29 @@ export function LayoutControls({
           <h3>Tune it for your printer and handwriting</h3>
         </div>
       </div>
+      <fieldset className="segmented-field">
+        <legend>Orientation</legend>
+        <div className="choice-grid" role="radiogroup" aria-label="Orientation">
+          <button
+            type="button"
+            className={`choice-card ${layout.orientation === 'portrait' ? 'is-active' : ''}`}
+            onClick={() => onOrientationChange('portrait')}
+            aria-pressed={layout.orientation === 'portrait'}
+          >
+            <strong>Portrait</strong>
+            <span>Classic page shape with fewer columns and more vertical room.</span>
+          </button>
+          <button
+            type="button"
+            className={`choice-card ${layout.orientation === 'landscape' ? 'is-active' : ''}`}
+            onClick={() => onOrientationChange('landscape')}
+            aria-pressed={layout.orientation === 'landscape'}
+          >
+            <strong>Landscape</strong>
+            <span>Best for fitting more metric columns before space runs out.</span>
+          </button>
+        </div>
+      </fieldset>
       <div className="field-grid">
         <label className="field">
           <span>Paper size</span>
@@ -40,18 +63,6 @@ export function LayoutControls({
           >
             <option value="letter">Letter</option>
             <option value="a4">A4</option>
-          </select>
-        </label>
-        <label className="field">
-          <span>Orientation</span>
-          <select
-            value={layout.orientation}
-            onChange={(event) =>
-              onOrientationChange(event.target.value as Orientation)
-            }
-          >
-            <option value="portrait">Portrait</option>
-            <option value="landscape">Landscape</option>
           </select>
         </label>
         <label className="field">

@@ -9,8 +9,12 @@
   --accent: #2452a5;
   --accent-soft: rgba(36, 82, 165, 0.1);
   --accent-strong: #183a78;
-  --warning-bg: #fff1dc;
-  --warning-border: #d69534;
+  --warning-bg: #fae7e4;
+  --warning-border: #c7655d;
+  --warning-text: #8f3028;
+  --error-bg: #f5d8d3;
+  --error-border: #b34f46;
+  --error-text: #7b241c;
   --shadow-soft: 0 22px 60px rgba(40, 29, 17, 0.12);
   --shadow-card: 0 14px 36px rgba(43, 28, 14, 0.09);
   --font-display: "Avenir Next Condensed", "Franklin Gothic Medium", "Arial Narrow", sans-serif;

@@ -36,6 +36,11 @@ captures the requirements that should guide implementation and review.
   fidelity.
 - Use blue-ink styling sparingly for example overlays and future data views
   rather than the printable template itself.
+- Use black, blue, and red as the primary ink-language colors in the UI, with
+  red reserved for abnormal states such as layout warnings and export/download
+  failures.
+- Keep abnormal-state styling consistent with the skeuomorphic writing metaphor
+  rather than using generic dashboard status colors.
 - Optimize line weights, spacing, and hierarchy for real home-printer output.
 - Keep the core generator approachable and low-friction.
 - Do not introduce unnecessary metric schemas when header strings are enough.

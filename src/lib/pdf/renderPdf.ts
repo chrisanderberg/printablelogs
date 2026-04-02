@@ -1,18 +1,27 @@
 import {
   CELL_PADDING_X,
+  CELL_PADDING_Y,
   FOOTER_HEIGHT,
   HEADER_FONT_SIZE,
+  HEADER_LINE_HEIGHT,
   INNER_GRID_WIDTH,
   OUTER_BORDER_WIDTH,
   TITLE_FONT_SIZE,
+  TITLE_LINE_HEIGHT,
 } from '@/lib/layout/constants';
 import type { ResolvedLayout } from '@/lib/layout/types';
 import { PDFDocument, StandardFonts, rgb } from 'pdf-lib';
 
-const TITLE_BASELINE_OFFSET = 12;
-
 function toPdfY(pageHeight: number, y: number): number {
   return pageHeight - y;
+}
+
+function getTopAlignedPdfY(
+  pageHeight: number,
+  topY: number,
+  fontSize: number
+): number {
+  return toPdfY(pageHeight, topY + fontSize);
 }
 
 export async function renderPdf(layout: ResolvedLayout): Promise<Uint8Array> {
@@ -23,12 +32,18 @@ export async function renderPdf(layout: ResolvedLayout): Promise<Uint8Array> {
   const black = rgb(0.07, 0.07, 0.07);
   const muted = rgb(0.42, 0.46, 0.51);
 
-  page.drawText(layout.title, {
-    x: layout.contentBox.x,
-    y: toPdfY(layout.page.height, layout.contentBox.y) + TITLE_BASELINE_OFFSET,
-    font: sansBold,
-    size: TITLE_FONT_SIZE,
-    color: black,
+  layout.titleLines.forEach((line, index) => {
+    page.drawText(line, {
+      x: layout.titleBox.x,
+      y: getTopAlignedPdfY(
+        layout.page.height,
+        layout.titleBox.y + index * TITLE_LINE_HEIGHT,
+        TITLE_FONT_SIZE
+      ),
+      font: sansBold,
+      size: TITLE_FONT_SIZE,
+      color: black,
+    });
   });
 
   page.drawRectangle({
@@ -78,15 +93,18 @@ export async function renderPdf(layout: ResolvedLayout): Promise<Uint8Array> {
   }
 
   for (const column of layout.columns) {
-    page.drawText(column.header, {
-      x: column.x + CELL_PADDING_X,
-      y: toPdfY(
-        layout.page.height,
-        layout.headerBox.y + layout.headerBox.height / 2 + HEADER_FONT_SIZE / 2
-      ),
-      font: sansBold,
-      size: HEADER_FONT_SIZE,
-      color: black,
+    column.headerLines.forEach((line, index) => {
+      page.drawText(line, {
+        x: column.x + CELL_PADDING_X,
+        y: getTopAlignedPdfY(
+          layout.page.height,
+          layout.headerBox.y + CELL_PADDING_Y + index * HEADER_LINE_HEIGHT,
+          HEADER_FONT_SIZE
+        ),
+        font: sansBold,
+        size: HEADER_FONT_SIZE,
+        color: black,
+      });
     });
   }
 

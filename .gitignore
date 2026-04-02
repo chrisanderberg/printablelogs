@@ -5,12 +5,27 @@ node_modules/
 dist/
 coverage/
 skills-lock.json
+.cache/
+.parcel-cache/
+.turbo/
+.vite/
+.vercel/
+.netlify/
+.wrangler/
+*.tsbuildinfo
+*.log
 
 .env
 .env.*
 !.env.example
+.envrc
+.direnv/
+.npmrc
 
 .DS_Store
+*.swp
+*.swo
+*.tmp
 
 .idea/
 .vscode/

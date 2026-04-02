@@ -16,6 +16,7 @@ export interface LayoutBox {
 export interface ResolvedLayoutColumn extends ResolvedTemplateColumn {
   x: number;
   width: number;
+  headerLines: string[];
 }
 
 export interface ResolvedLayoutWarning {
@@ -26,6 +27,7 @@ export interface ResolvedLayoutWarning {
 
 export interface ResolvedLayout {
   title: string;
+  titleLines: string[];
   pageSize: PageSize;
   orientation: Orientation;
   timeGranularity: TimeGranularity;
@@ -40,6 +42,7 @@ export interface ResolvedLayout {
     bottom: number;
     left: number;
   };
+  titleBox: LayoutBox;
   contentBox: LayoutBox;
   headerBox: LayoutBox;
   bodyBox: LayoutBox;

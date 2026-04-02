@@ -36,6 +36,13 @@ export function LogBuilderApp() {
   const [isPending, startTransition] = useTransition();
   const normalizedTemplate = normalizeTemplate(template);
   const layout = resolveLayout(normalizedTemplate);
+  const visibleMetricCount = layout.columns.filter(
+    (column) => column.kind === 'metric'
+  ).length;
+  const hiddenMetricCount = Math.max(
+    normalizedTemplate.metricColumns.length - visibleMetricCount,
+    0
+  );
 
   function updateTemplate(updater: (current: TemplateV1) => TemplateV1) {
     startTransition(() => {
@@ -149,6 +156,13 @@ export function LogBuilderApp() {
             <div>
               <p className="builder-label">Preview</p>
               <h2>{normalizedTemplate.title}</h2>
+              <p className="builder-note">
+                {layout.orientation === 'landscape'
+                  ? `Landscape is active. ${visibleMetricCount} metric columns fit on this page.`
+                  : hiddenMetricCount > 0
+                    ? `Portrait is active. ${hiddenMetricCount} metric column${hiddenMetricCount === 1 ? '' : 's'} will be hidden unless you switch to landscape or remove some columns.`
+                    : `Portrait is active. ${visibleMetricCount} metric columns fit on this page.`}
+              </p>
             </div>
             <div className="preview-panel__actions">
               <label className="toggle-field">
@@ -171,9 +185,9 @@ export function LogBuilderApp() {
           </div>
 
           {layout.warnings.length > 0 && (
-            <div className="warning-stack" aria-live="polite">
+            <div className="notice-stack" aria-live="polite">
               {layout.warnings.map((warning) => (
-                <p key={warning.id} className="warning-card">
+                <p key={warning.id} className="notice-card notice-card--warning">
                   {warning.message}
                 </p>
               ))}
@@ -181,8 +195,8 @@ export function LogBuilderApp() {
           )}
 
           {downloadError && (
-            <div className="warning-stack" aria-live="polite">
-              <p className="warning-card">{downloadError}</p>
+            <div className="notice-stack" aria-live="polite">
+              <p className="notice-card notice-card--error">{downloadError}</p>
             </div>
           )}
 

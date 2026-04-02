@@ -1,6 +1,10 @@
 import {
+  CELL_PADDING_X,
+  CELL_PADDING_Y,
   FOOTER_HEIGHT,
   HEADER_HEIGHT,
+  HEADER_FONT_SIZE,
+  HEADER_LINE_HEIGHT,
   INNER_GRID_WIDTH,
   MIN_METRIC_COLUMN_WIDTH,
   MIN_NOTES_COLUMN_WIDTH,
@@ -8,8 +12,12 @@ import {
   OUTER_BORDER_WIDTH,
   PAGE_MARGIN_INCHES,
   POINTS_PER_INCH,
+  TITLE_FONT_SIZE,
+  TITLE_GAP,
+  TITLE_LINE_HEIGHT,
   getPageDimensions,
 } from './constants';
+import { wrapTextByWords } from './textWrap';
 import { validateLayout } from './validation';
 import { getResolvedColumns, normalizeTemplate } from '../template/normalize';
 import type { ColumnWidthPreset, TemplateV1 } from '../template/types';
@@ -116,31 +124,30 @@ export function resolveLayout(templateInput: TemplateV1): ResolvedLayout {
     bottom: PAGE_MARGIN_INCHES.bottom * POINTS_PER_INCH,
     left: PAGE_MARGIN_INCHES.left * POINTS_PER_INCH,
   };
-  const contentBox = {
+  const printableBox = {
     x: margins.left,
     y: margins.top,
     width: page.width - margins.left - margins.right,
     height: page.height - margins.top - margins.bottom,
   };
-  const headerBox = {
-    x: contentBox.x,
-    y: contentBox.y,
-    width: contentBox.width,
-    height: HEADER_HEIGHT,
+  const titleLines = wrapTextByWords(
+    template.title,
+    printableBox.width,
+    TITLE_FONT_SIZE,
+    'bold'
+  );
+  const titleBox = {
+    x: printableBox.x,
+    y: printableBox.y,
+    width: printableBox.width,
+    height: titleLines.length * TITLE_LINE_HEIGHT,
   };
-  const footerBox = {
-    x: contentBox.x,
-    y: contentBox.y + contentBox.height - FOOTER_HEIGHT,
-    width: contentBox.width,
-    height: FOOTER_HEIGHT,
+  const contentBox = {
+    x: printableBox.x,
+    y: titleBox.y + titleBox.height + TITLE_GAP,
+    width: printableBox.width,
+    height: printableBox.height - titleBox.height - TITLE_GAP,
   };
-  const bodyBox = {
-    x: contentBox.x,
-    y: headerBox.y + headerBox.height,
-    width: contentBox.width,
-    height: contentBox.height - headerBox.height - footerBox.height,
-  };
-  const rowHeight = bodyBox.height / template.layout.rowsPerPage;
   const metricCount = template.metricColumns.length;
   const widths = resolveColumnWidths(
     contentBox.width,
@@ -164,10 +171,17 @@ export function resolveLayout(templateInput: TemplateV1): ResolvedLayout {
       width = widths.notesWidth;
     }
 
+    const headerLines = wrapTextByWords(
+      column.header,
+      Math.max(width - CELL_PADDING_X * 2, 1),
+      HEADER_FONT_SIZE,
+      'bold'
+    );
     const resolvedColumn = {
       ...column,
       x: currentX,
       width,
+      headerLines,
     };
 
     currentX += width;
@@ -183,6 +197,32 @@ export function resolveLayout(templateInput: TemplateV1): ResolvedLayout {
     contentBox.x,
     ...resolvedColumns.map((column) => column.x + column.width),
   ];
+  const maxHeaderLineCount = Math.max(
+    ...resolvedColumns.map((column) => column.headerLines.length),
+    1
+  );
+  const headerBox = {
+    x: contentBox.x,
+    y: contentBox.y,
+    width: contentBox.width,
+    height: Math.max(
+      HEADER_HEIGHT,
+      maxHeaderLineCount * HEADER_LINE_HEIGHT + CELL_PADDING_Y * 2
+    ),
+  };
+  const footerBox = {
+    x: contentBox.x,
+    y: contentBox.y + contentBox.height - FOOTER_HEIGHT,
+    width: contentBox.width,
+    height: FOOTER_HEIGHT,
+  };
+  const bodyBox = {
+    x: contentBox.x,
+    y: headerBox.y + headerBox.height,
+    width: contentBox.width,
+    height: contentBox.height - headerBox.height - footerBox.height,
+  };
+  const rowHeight = bodyBox.height / template.layout.rowsPerPage;
   const rowLines = Array.from(
     { length: template.layout.rowsPerPage + 1 },
     (_, index) => bodyBox.y + index * rowHeight
@@ -196,21 +236,29 @@ export function resolveLayout(templateInput: TemplateV1): ResolvedLayout {
   });
 
   if (widths.hiddenMetricCount > 0) {
+    const metricColumnCount = widths.metricWidths.length;
+    const overflowGuidance =
+      template.layout.orientation === 'portrait'
+        ? 'Switch to landscape to fit more columns on one page.'
+        : 'Remove a few metrics or use a narrower width preset to include the rest.';
+
     warnings.push({
       id: 'metric-limit',
       level: 'warning',
-      message: `Only the first ${widths.metricWidths.length} metric columns fit on this page. Remove a few metrics or switch to a wider layout to include the rest.`,
+      message: `Only the first ${metricColumnCount} metric columns fit on this page. ${overflowGuidance}`,
     });
   }
 
   return {
     title: template.title,
+    titleLines,
     pageSize: template.layout.pageSize,
     orientation: template.layout.orientation,
     timeGranularity: template.timeGranularity,
     widthPreset: template.layout.widthPreset,
     page,
     margins,
+    titleBox,
     contentBox,
     headerBox,
     bodyBox,

@@ -1,4 +1,12 @@
-import { CELL_PADDING_X, CELL_PADDING_Y, FOOTER_HEIGHT, HEADER_FONT_SIZE, TITLE_FONT_SIZE } from '@/lib/layout/constants';
+import {
+  CELL_PADDING_X,
+  CELL_PADDING_Y,
+  FOOTER_HEIGHT,
+  HEADER_FONT_SIZE,
+  HEADER_LINE_HEIGHT,
+  TITLE_FONT_SIZE,
+  TITLE_LINE_HEIGHT,
+} from '@/lib/layout/constants';
 import { gridStrokeWidths } from '@/lib/layout/resolveLayout';
 import type { ResolvedLayout } from '@/lib/layout/types';
 import { getExampleRows } from '@/lib/preview/exampleData';
@@ -28,14 +36,22 @@ export function PrintPreview({ layout, showExample }: PrintPreviewProps) {
           fill="#fffef9"
         />
         <text
-          x={layout.contentBox.x}
-          y={layout.contentBox.y - 12}
+          x={layout.titleBox.x}
+          y={layout.titleBox.y + TITLE_FONT_SIZE}
           fontSize={TITLE_FONT_SIZE}
           fontWeight="700"
           fill="#111111"
           fontFamily="var(--font-display)"
         >
-          {layout.title}
+          {layout.titleLines.map((line, index) => (
+            <tspan
+              key={`${line}-${index}`}
+              x={layout.titleBox.x}
+              dy={index === 0 ? 0 : TITLE_LINE_HEIGHT}
+            >
+              {line}
+            </tspan>
+          ))}
         </text>
         <rect
           x={layout.contentBox.x}
@@ -80,13 +96,21 @@ export function PrintPreview({ layout, showExample }: PrintPreviewProps) {
           <text
             key={column.key}
             x={column.x + CELL_PADDING_X}
-            y={layout.headerBox.y + layout.headerBox.height / 2 + HEADER_FONT_SIZE / 3}
+            y={layout.headerBox.y + CELL_PADDING_Y + HEADER_FONT_SIZE}
             fontSize={HEADER_FONT_SIZE}
             fontWeight="700"
             fill="#111111"
             fontFamily="var(--font-display)"
           >
-            {column.header}
+            {column.headerLines.map((line, index) => (
+              <tspan
+                key={`${column.key}-${line}-${index}`}
+                x={column.x + CELL_PADDING_X}
+                dy={index === 0 ? 0 : HEADER_LINE_HEIGHT}
+              >
+                {line}
+              </tspan>
+            ))}
           </text>
         ))}
         <text
