@@ -142,7 +142,11 @@ export function resolveLayout(
     width: page.width - margins.left - margins.right,
     height: page.height - margins.top - margins.bottom,
   };
-  const maxReservedHeight = Math.max(printableBox.height - MIN_BODY_HEIGHT, 0);
+  const maxReservedTitleHeight = Math.max(
+    printableBox.height -
+      (TITLE_GAP + HEADER_HEIGHT + FOOTER_HEIGHT + MIN_BODY_HEIGHT),
+    0
+  );
   const wrappedTitleLines = wrapTextByWords(
     template.title,
     printableBox.width,
@@ -154,7 +158,10 @@ export function resolveLayout(
     x: printableBox.x,
     y: printableBox.y,
     width: printableBox.width,
-    height: Math.min(wrappedTitleLines.length * TITLE_LINE_HEIGHT, maxReservedHeight),
+    height: Math.min(
+      wrappedTitleLines.length * TITLE_LINE_HEIGHT,
+      maxReservedTitleHeight
+    ),
   };
   const maxTitleLineCount = Math.floor(titleBox.height / TITLE_LINE_HEIGHT);
   const titleLines = wrappedTitleLines.slice(0, maxTitleLineCount);
@@ -195,15 +202,19 @@ export function resolveLayout(
       'bold',
       headingFontFamily
     );
-    const maxHeaderHeight = Math.min(
+    const maxHeaderHeight = Math.max(
+      contentBox.height - FOOTER_HEIGHT - MIN_BODY_HEIGHT,
+      0
+    );
+    const cappedHeaderHeight = Math.min(
       Math.max(
         HEADER_HEIGHT,
         wrappedHeaderLines.length * HEADER_LINE_HEIGHT + CELL_PADDING_Y * 2
       ),
-      maxReservedHeight
+      maxHeaderHeight
     );
     const maxHeaderLineCount = Math.floor(
-      Math.max(maxHeaderHeight - CELL_PADDING_Y * 2, 0) / HEADER_LINE_HEIGHT
+      cappedHeaderHeight / HEADER_LINE_HEIGHT
     );
     const headerLines = wrappedHeaderLines.slice(0, maxHeaderLineCount);
     const resolvedColumn = {
@@ -230,6 +241,10 @@ export function resolveLayout(
     ...resolvedColumns.map((column) => column.headerLines.length),
     1
   );
+  const maxHeaderHeight = Math.max(
+    contentBox.height - FOOTER_HEIGHT - MIN_BODY_HEIGHT,
+    0
+  );
   const headerBox = {
     x: contentBox.x,
     y: contentBox.y,
@@ -239,7 +254,7 @@ export function resolveLayout(
         HEADER_HEIGHT,
         maxHeaderLineCount * HEADER_LINE_HEIGHT + CELL_PADDING_Y * 2
       ),
-      maxReservedHeight
+      maxHeaderHeight
     ),
   };
   const footerBox = {
