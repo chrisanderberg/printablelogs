@@ -149,11 +149,12 @@ export function resolveLayout(templateInput: TemplateV1): ResolvedLayout {
     height: printableBox.height - titleBox.height - TITLE_GAP,
   };
   const metricCount = template.metricColumns.length;
+  const isDaily = template.timeGranularity === 'daily';
   const widths = resolveColumnWidths(
     contentBox.width,
     metricCount,
     template.layout.widthPreset,
-    false
+    isDaily
   );
   const columns = getResolvedColumns(template, widths.metricWidths.length);
 
