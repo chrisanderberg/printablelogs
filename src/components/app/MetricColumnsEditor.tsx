@@ -45,8 +45,8 @@ export function MetricColumnsEditor({
       clearDrag();
       return;
     }
-    // Adjust toIndex based on whether we're dropping before or after
-    const finalIndex = dropPosition === 'before' ? toIndex : toIndex;
+    const targetIndex = dropPosition === 'before' ? toIndex : toIndex + 1;
+    const finalIndex = from < targetIndex ? targetIndex - 1 : targetIndex;
     onReorderMetric(from, finalIndex);
     clearDrag();
   }

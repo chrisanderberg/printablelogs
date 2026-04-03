@@ -1,7 +1,7 @@
 ---
 import '../styles/global.css';
 import SiteHeader from '../components/site/SiteHeader.astro';
-import { SITE_NAME, SITE_TAGLINE } from '../lib/site';
+import { SITE_NAME, SITE_TAGLINE, withBasePath } from '../lib/site';
 
 interface Props {
   title?: string;
@@ -21,7 +21,7 @@ const {
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{title}</title>
     <meta name="description" content={description} />
-    <link rel="icon" type="image/svg+xml" href={`${import.meta.env.BASE_URL}favicon.svg`} />
+    <link rel="icon" type="image/svg+xml" href={withBasePath(import.meta.env.BASE_URL, 'favicon.svg')} />
 
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -34,7 +34,15 @@ const {
     <!-- Prevent flash of wrong theme -->
     <script is:inline>
       (function () {
-        var stored = localStorage.getItem('theme');
+        function getStoredTheme() {
+          try {
+            return localStorage.getItem('theme');
+          } catch {
+            return null;
+          }
+        }
+
+        var stored = getStoredTheme();
         var prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
         if (stored === 'dark' || (!stored && prefersDark)) {
           document.documentElement.dataset.theme = 'dark';
@@ -52,6 +60,22 @@ const {
 
     <!-- Theme toggle function + system preference listener -->
     <script is:inline>
+      function getStoredTheme() {
+        try {
+          return localStorage.getItem('theme');
+        } catch {
+          return null;
+        }
+      }
+
+      function setStoredTheme(theme) {
+        try {
+          localStorage.setItem('theme', theme);
+        } catch {
+          // Keep theme switching functional even if storage is unavailable.
+        }
+      }
+
       window.__toggleTheme = function () {
         var html = document.documentElement;
         var current = html.dataset.theme;
@@ -60,14 +84,21 @@ const {
           (!current && window.matchMedia('(prefers-color-scheme: dark)').matches);
         var next = isDark ? 'light' : 'dark';
         html.dataset.theme = next;
-        localStorage.setItem('theme', next);
+        setStoredTheme(next);
       };
 
-      window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', function (e) {
-        if (!localStorage.getItem('theme')) {
+      var mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+      var handleThemePreferenceChange = function (e) {
+        if (!getStoredTheme()) {
           document.documentElement.dataset.theme = e.matches ? 'dark' : 'light';
         }
-      });
+      };
+
+      if (typeof mediaQuery.addEventListener === 'function') {
+        mediaQuery.addEventListener('change', handleThemePreferenceChange);
+      } else if (typeof mediaQuery.addListener === 'function') {
+        mediaQuery.addListener(handleThemePreferenceChange);
+      }
     </script>
   </body>
 </html>

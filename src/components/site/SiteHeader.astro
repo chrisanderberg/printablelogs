@@ -1,11 +1,14 @@
 ---
 import { REPO_ROOT } from '../../lib/github';
-import { SITE_NAME } from '../../lib/site';
+import { SITE_NAME, withBasePath } from '../../lib/site';
+
+const homeHref = withBasePath(import.meta.env.BASE_URL);
+const aboutHref = withBasePath(import.meta.env.BASE_URL, 'about/');
 ---
 
 <header class="site-header">
   <div class="container site-header__inner">
-    <a class="site-header__brand" href={`${import.meta.env.BASE_URL}`}>
+    <a class="site-header__brand" href={homeHref}>
       <!-- Pen-nib icon -->
       <svg
         class="brand-icon"
@@ -41,8 +44,8 @@ import { SITE_NAME } from '../../lib/site';
 
     <div class="site-header__right">
       <nav class="site-header__nav" aria-label="Primary">
-        <a href={`${import.meta.env.BASE_URL}`}>Home</a>
-        <a href={`${import.meta.env.BASE_URL}about/`}>About</a>
+        <a href={homeHref}>Home</a>
+        <a href={aboutHref}>About</a>
         <a href={REPO_ROOT} target="_blank" rel="noreferrer">GitHub</a>
       </nav>
 
@@ -94,7 +97,7 @@ import { SITE_NAME } from '../../lib/site';
 
 <script>
   document.querySelector('[data-theme-toggle]')?.addEventListener('click', () => {
-    (window as { __toggleTheme?: () => void }).__toggleTheme?.();
+    window.__toggleTheme?.();
   });
 </script>
 
