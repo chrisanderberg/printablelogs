@@ -32,11 +32,12 @@ export function LayoutControls({
   }, [layout.rowsPerPage]);
 
   function commitRows(raw: string) {
-    const parsed = Number.parseInt(raw, 10);
-    if (Number.isNaN(parsed)) {
+    if (!/^\s*\d+\s*$/.test(raw)) {
       setRowsInput(String(layout.rowsPerPage));
       return;
     }
+
+    const parsed = Number.parseInt(raw, 10);
     const clamped = Math.min(MAX_ROWS_PER_PAGE, Math.max(MIN_ROWS_PER_PAGE, parsed));
     onRowsPerPageChange(clamped);
     setRowsInput(String(clamped));

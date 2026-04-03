@@ -76,6 +76,10 @@ const {
         }
       }
 
+      function emitThemeChange(theme) {
+        window.dispatchEvent(new CustomEvent('themechange', { detail: { theme } }));
+      }
+
       window.__toggleTheme = function () {
         var html = document.documentElement;
         var current = html.dataset.theme;
@@ -85,14 +89,22 @@ const {
         var next = isDark ? 'light' : 'dark';
         html.dataset.theme = next;
         setStoredTheme(next);
+        emitThemeChange(next);
       };
 
       var mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
       var handleThemePreferenceChange = function (e) {
         if (!getStoredTheme()) {
-          document.documentElement.dataset.theme = e.matches ? 'dark' : 'light';
+          var nextTheme = e.matches ? 'dark' : 'light';
+          document.documentElement.dataset.theme = nextTheme;
+          emitThemeChange(nextTheme);
         }
       };
+
+      emitThemeChange(
+        document.documentElement.dataset.theme ||
+        (mediaQuery.matches ? 'dark' : 'light')
+      );
 
       if (typeof mediaQuery.addEventListener === 'function') {
         mediaQuery.addEventListener('change', handleThemePreferenceChange);

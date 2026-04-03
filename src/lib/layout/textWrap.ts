@@ -1,4 +1,6 @@
 type FontWeight = 'regular' | 'bold';
+const DEFAULT_FONT_FAMILY = 'Helvetica, Arial, sans-serif';
+let measurementContext: CanvasRenderingContext2D | null | undefined;
 
 function estimateCharacterWidth(character: string): number {
   if (character === ' ') {
@@ -28,7 +30,22 @@ function estimateCharacterWidth(character: string): number {
   return 0.54;
 }
 
-export function estimateTextWidth(
+function getMeasurementContext(): CanvasRenderingContext2D | null {
+  if (measurementContext !== undefined) {
+    return measurementContext;
+  }
+
+  if (typeof document === 'undefined') {
+    measurementContext = null;
+    return measurementContext;
+  }
+
+  const canvas = document.createElement('canvas');
+  measurementContext = canvas.getContext('2d');
+  return measurementContext;
+}
+
+function estimateTextWidthFallback(
   text: string,
   fontSize: number,
   weight: FontWeight = 'regular'
@@ -44,11 +61,62 @@ export function estimateTextWidth(
   );
 }
 
+export function estimateTextWidth(
+  text: string,
+  fontSize: number,
+  weight: FontWeight = 'regular',
+  fontFamily: string = DEFAULT_FONT_FAMILY
+): number {
+  const context = getMeasurementContext();
+
+  if (!context) {
+    return estimateTextWidthFallback(text, fontSize, weight);
+  }
+
+  context.font = `${weight === 'bold' ? '700' : '400'} ${fontSize}px ${fontFamily}`;
+  return context.measureText(text).width;
+}
+
+function splitTokenToFit(
+  token: string,
+  maxWidth: number,
+  fontSize: number,
+  weight: FontWeight,
+  fontFamily: string
+): string[] {
+  const slices: string[] = [];
+  let start = 0;
+
+  while (start < token.length) {
+    let end = start + 1;
+    let bestEnd = end;
+
+    while (end <= token.length) {
+      const slice = token.slice(start, end);
+      if (estimateTextWidth(slice, fontSize, weight, fontFamily) > maxWidth) {
+        break;
+      }
+      bestEnd = end;
+      end += 1;
+    }
+
+    if (bestEnd === start) {
+      bestEnd = start + 1;
+    }
+
+    slices.push(token.slice(start, bestEnd));
+    start = bestEnd;
+  }
+
+  return slices;
+}
+
 export function wrapTextByWords(
   text: string,
   maxWidth: number,
   fontSize: number,
-  weight: FontWeight = 'regular'
+  weight: FontWeight = 'regular',
+  fontFamily: string = DEFAULT_FONT_FAMILY
 ): string[] {
   const normalizedText = text.trim().replace(/\s+/g, ' ');
 
@@ -61,18 +129,25 @@ export function wrapTextByWords(
   let currentLine = '';
 
   for (const word of words) {
-    const candidate = currentLine ? `${currentLine} ${word}` : word;
+    const segments =
+      estimateTextWidth(word, fontSize, weight, fontFamily) > maxWidth
+        ? splitTokenToFit(word, maxWidth, fontSize, weight, fontFamily)
+        : [word];
 
-    if (
-      currentLine &&
-      estimateTextWidth(candidate, fontSize, weight) > maxWidth
-    ) {
-      lines.push(currentLine);
-      currentLine = word;
-      continue;
+    for (const segment of segments) {
+      const candidate = currentLine ? `${currentLine} ${segment}` : segment;
+
+      if (
+        currentLine &&
+        estimateTextWidth(candidate, fontSize, weight, fontFamily) > maxWidth
+      ) {
+        lines.push(currentLine);
+        currentLine = segment;
+        continue;
+      }
+
+      currentLine = candidate;
     }
-
-    currentLine = candidate;
   }
 
   if (currentLine) {

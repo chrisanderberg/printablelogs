@@ -4,9 +4,10 @@ let metricColumnCounter = 0;
 
 export function createMetricColumn(header: string, id?: string): MetricColumn {
   metricColumnCounter += 1;
+  const safeId = id && id.trim().length > 0 ? id.trim() : `metric-${metricColumnCounter}`;
 
   return {
-    id: id ?? `metric-${metricColumnCounter}`,
+    id: safeId,
     header,
   };
 }

@@ -23,5 +23,8 @@ const EXAMPLE_ROWS: ExampleRow[] = [
 ];
 
 export function getExampleRows(): ExampleRow[] {
-  return EXAMPLE_ROWS;
+  return EXAMPLE_ROWS.map((row) => ({
+    ...row,
+    metrics: [...row.metrics],
+  }));
 }

@@ -127,16 +127,17 @@ export function PrintPreview({ layout, showExample }: PrintPreviewProps) {
             const exampleFontSize = Math.min(layout.rowHeight * 0.55, 12);
             const y =
               layout.bodyBox.y + rowIndex * layout.rowHeight + layout.rowHeight * 0.65;
+            let metricIndex = 0;
 
             return (
               <g key={`${row.time}-${rowIndex}`}>
-                {layout.columns.map((column, columnIndex) => {
+                {layout.columns.map((column) => {
                   const value =
                     column.kind === 'time'
                       ? row.time
                       : column.kind === 'notes'
                         ? row.notes
-                        : row.metrics[columnIndex - 1] ?? '';
+                        : row.metrics[metricIndex++] ?? '';
 
                   return (
                     <text

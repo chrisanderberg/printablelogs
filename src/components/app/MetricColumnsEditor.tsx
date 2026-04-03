@@ -1,4 +1,5 @@
 import { useRef, useState } from 'react';
+import type { DragEvent } from 'react';
 import type { MetricColumn } from '@/lib/template/types';
 
 interface MetricColumnsEditorProps {
@@ -29,7 +30,7 @@ export function MetricColumnsEditor({
     dragIndexRef.current = index;
   }
 
-  function handleDragOver(e: React.DragEvent<HTMLDivElement>, index: number) {
+  function handleDragOver(e: DragEvent<HTMLDivElement>, index: number) {
     e.preventDefault();
     const rect = e.currentTarget.getBoundingClientRect();
     const midY = rect.top + rect.height / 2;
@@ -38,7 +39,7 @@ export function MetricColumnsEditor({
     setDropPosition(pos);
   }
 
-  function handleDrop(e: React.DragEvent<HTMLDivElement>, toIndex: number) {
+  function handleDrop(e: DragEvent<HTMLDivElement>, toIndex: number) {
     e.preventDefault();
     const from = dragIndexRef.current;
     if (from === null || from === toIndex) {

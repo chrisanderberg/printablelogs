@@ -1,16 +1,11 @@
-import type { MetricColumn } from '@/lib/template/types';
+import type { MetricColumn, TemplateLayout } from '@/lib/template/types';
 import { LayoutControls } from './LayoutControls';
 import { MetricColumnsEditor } from './MetricColumnsEditor';
 
 interface TemplateFormProps {
   title: string;
   metricColumns: MetricColumn[];
-  layout: {
-    pageSize: 'letter' | 'a4';
-    orientation: 'portrait' | 'landscape';
-    rowsPerPage: number;
-    widthPreset: 'balanced' | 'notes-heavy' | 'metrics-heavy';
-  };
+  layout: TemplateLayout;
   onTitleChange: (value: string) => void;
   onMetricChange: (id: string, value: string) => void;
   onAddMetric: () => void;

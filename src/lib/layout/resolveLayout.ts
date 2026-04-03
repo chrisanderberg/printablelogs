@@ -8,6 +8,7 @@ import {
   INNER_GRID_WIDTH,
   MIN_METRIC_COLUMN_WIDTH,
   MIN_NOTES_COLUMN_WIDTH,
+  MIN_ROW_HEIGHT,
   MIN_TIME_COLUMN_WIDTH,
   OUTER_BORDER_WIDTH,
   PAGE_MARGIN_INCHES,
@@ -22,6 +23,9 @@ import { validateLayout } from './validation';
 import { getResolvedColumns, normalizeTemplate } from '../template/normalize';
 import type { ColumnWidthPreset, TemplateV1 } from '../template/types';
 import type { ResolvedLayout, ResolvedLayoutColumn } from './types';
+
+const MIN_BODY_HEIGHT = MIN_ROW_HEIGHT;
+const PDF_FONT_FAMILY = 'Helvetica, Arial, sans-serif';
 
 function getWidthPercentages(
   preset: ColumnWidthPreset,
@@ -130,23 +134,25 @@ export function resolveLayout(templateInput: TemplateV1): ResolvedLayout {
     width: page.width - margins.left - margins.right,
     height: page.height - margins.top - margins.bottom,
   };
+  const maxReservedHeight = Math.max(printableBox.height - MIN_BODY_HEIGHT, 0);
   const titleLines = wrapTextByWords(
     template.title,
     printableBox.width,
     TITLE_FONT_SIZE,
-    'bold'
+    'bold',
+    PDF_FONT_FAMILY
   );
   const titleBox = {
     x: printableBox.x,
     y: printableBox.y,
     width: printableBox.width,
-    height: titleLines.length * TITLE_LINE_HEIGHT,
+    height: Math.min(titleLines.length * TITLE_LINE_HEIGHT, maxReservedHeight),
   };
   const contentBox = {
     x: printableBox.x,
     y: titleBox.y + titleBox.height + TITLE_GAP,
     width: printableBox.width,
-    height: printableBox.height - titleBox.height - TITLE_GAP,
+    height: Math.max(0, printableBox.height - titleBox.height - TITLE_GAP),
   };
   const metricCount = template.metricColumns.length;
   const isDaily = template.timeGranularity === 'daily';
@@ -176,7 +182,8 @@ export function resolveLayout(templateInput: TemplateV1): ResolvedLayout {
       column.header,
       Math.max(width - CELL_PADDING_X * 2, 1),
       HEADER_FONT_SIZE,
-      'bold'
+      'bold',
+      PDF_FONT_FAMILY
     );
     const resolvedColumn = {
       ...column,
@@ -206,14 +213,17 @@ export function resolveLayout(templateInput: TemplateV1): ResolvedLayout {
     x: contentBox.x,
     y: contentBox.y,
     width: contentBox.width,
-    height: Math.max(
-      HEADER_HEIGHT,
-      maxHeaderLineCount * HEADER_LINE_HEIGHT + CELL_PADDING_Y * 2
+    height: Math.min(
+      Math.max(
+        HEADER_HEIGHT,
+        maxHeaderLineCount * HEADER_LINE_HEIGHT + CELL_PADDING_Y * 2
+      ),
+      maxReservedHeight
     ),
   };
   const footerBox = {
     x: contentBox.x,
-    y: contentBox.y + contentBox.height - FOOTER_HEIGHT,
+    y: contentBox.y + Math.max(contentBox.height - FOOTER_HEIGHT, 0),
     width: contentBox.width,
     height: FOOTER_HEIGHT,
   };
@@ -221,16 +231,20 @@ export function resolveLayout(templateInput: TemplateV1): ResolvedLayout {
     x: contentBox.x,
     y: headerBox.y + headerBox.height,
     width: contentBox.width,
-    height: contentBox.height - headerBox.height - footerBox.height,
+    height: Math.max(0, contentBox.height - headerBox.height - footerBox.height),
   };
-  const rowHeight = bodyBox.height / template.layout.rowsPerPage;
+  const rawRowHeight = Math.floor(bodyBox.height / template.layout.rowsPerPage);
+  const rowHeight = Math.max(
+    MIN_ROW_HEIGHT,
+    rawRowHeight
+  );
   const rowLines = Array.from(
     { length: template.layout.rowsPerPage + 1 },
     (_, index) => bodyBox.y + index * rowHeight
   );
 
   const warnings = validateLayout({
-    rowHeight,
+    rowHeight: rawRowHeight,
     timeWidth: widths.timeWidth,
     metricWidths: widths.metricWidths,
     notesWidth: widths.notesWidth,

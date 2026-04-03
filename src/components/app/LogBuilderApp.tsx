@@ -11,6 +11,10 @@ import { PrintPreview } from './PrintPreview';
 import { TemplateForm } from './TemplateForm';
 
 function moveItem<T>(values: T[], index: number, direction: -1 | 1) {
+  if (!Number.isInteger(index) || index < 0 || index >= values.length) {
+    return values;
+  }
+
   const nextIndex = index + direction;
 
   if (nextIndex < 0 || nextIndex >= values.length) {
@@ -25,6 +29,18 @@ function moveItem<T>(values: T[], index: number, direction: -1 | 1) {
 }
 
 function reorderItem<T>(items: T[], from: number, to: number): T[] {
+  if (
+    !Number.isInteger(from) ||
+    from < 0 ||
+    from >= items.length ||
+    !Number.isInteger(to) ||
+    to < 0 ||
+    to > items.length ||
+    from === to
+  ) {
+    return items;
+  }
+
   if (from === to) return items;
   const result = [...items];
   const [moved] = result.splice(from, 1);

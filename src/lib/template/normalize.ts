@@ -13,6 +13,10 @@ function cleanMetricHeader(header: string): string {
 }
 
 export function normalizeTemplate(template: TemplateV1): TemplateV1 {
+  const rawRowsPerPage = Number(template.layout.rowsPerPage);
+  const safeRowsPerPage = Number.isFinite(rawRowsPerPage)
+    ? rawRowsPerPage
+    : DEFAULT_TEMPLATE.layout.rowsPerPage;
   const metricColumns = template.metricColumns
     .map((column) => ({
       id: column.id,
@@ -32,7 +36,7 @@ export function normalizeTemplate(template: TemplateV1): TemplateV1 {
       orientation: template.layout.orientation,
       rowsPerPage: Math.max(
         MIN_ROWS_PER_PAGE,
-        Math.min(MAX_ROWS_PER_PAGE, Math.round(template.layout.rowsPerPage))
+        Math.min(MAX_ROWS_PER_PAGE, Math.round(safeRowsPerPage))
       ),
       widthPreset: template.layout.widthPreset,
     },
@@ -43,7 +47,8 @@ export function getResolvedColumns(
   template: TemplateV1,
   metricCount: number = template.metricColumns.length
 ): ResolvedTemplateColumn[] {
-  const timeHeader = 'Date / Time';
+  const timeHeader =
+    template.timeGranularity === 'daily' ? 'Date' : 'Date / Time';
   const metricColumns = template.metricColumns.slice(0, metricCount).map((column) => ({
     key: column.id,
     header: column.header,
