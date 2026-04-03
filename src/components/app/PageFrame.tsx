@@ -9,16 +9,18 @@ interface PageFrameProps extends PropsWithChildren {
 export function PageFrame({ layout, className, children }: PageFrameProps) {
   return (
     <div className={className}>
-      <div
-        className="page-frame"
-        style={
-          {
-            '--page-width': `${layout.page.width}px`,
-            '--page-height': `${layout.page.height}px`,
-          } as CSSProperties
-        }
-      >
-        {children}
+      <div className="desk-mat">
+        <div
+          className="page-frame"
+          style={
+            {
+              '--page-width': `${layout.page.width}px`,
+              '--page-height': `${layout.page.height}px`,
+            } as CSSProperties
+          }
+        >
+          {children}
+        </div>
       </div>
     </div>
   );

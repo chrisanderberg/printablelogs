@@ -170,7 +170,17 @@ export function LogBuilderApp() {
                 onClick={() => void handleDownload()}
                 disabled={isPending || isDownloading}
               >
-                {isDownloading ? 'Preparing PDF...' : 'Download PDF'}
+                {isDownloading ? (
+                  'Preparing…'
+                ) : (
+                  <>
+                    <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                      <path d="M7 1v8M7 9l-3-3M7 9l3-3"/>
+                      <path d="M1 11v1.5A.5.5 0 0 0 1.5 13h11a.5.5 0 0 0 .5-.5V11"/>
+                    </svg>
+                    Download PDF
+                  </>
+                )}
               </button>
             </div>
           </div>

@@ -33,15 +33,15 @@ export function PrintPreview({ layout, showExample }: PrintPreviewProps) {
           y={0}
           width={layout.page.width}
           height={layout.page.height}
-          fill="#fffef9"
+          fill="var(--board-bg)"
         />
         <text
           x={layout.titleBox.x}
           y={layout.titleBox.y + TITLE_FONT_SIZE}
           fontSize={TITLE_FONT_SIZE}
           fontWeight="700"
-          fill="#111111"
-          fontFamily="var(--font-display)"
+          fill="var(--board-ink)"
+          fontFamily="'Playfair Display', Georgia, serif"
         >
           {layout.titleLines.map((line, index) => (
             <tspan
@@ -59,7 +59,7 @@ export function PrintPreview({ layout, showExample }: PrintPreviewProps) {
           width={layout.contentBox.width}
           height={layout.headerBox.height + layout.bodyBox.height}
           fill="none"
-          stroke="#111111"
+          stroke="var(--board-ink)"
           strokeWidth={gridStrokeWidths.outer}
         />
         {layout.columnLines.slice(1, -1).map((line) => (
@@ -69,7 +69,7 @@ export function PrintPreview({ layout, showExample }: PrintPreviewProps) {
             y1={layout.contentBox.y}
             x2={line}
             y2={layout.bodyBox.y + layout.bodyBox.height}
-            stroke="#111111"
+            stroke="var(--board-stroke)"
             strokeWidth={gridStrokeWidths.inner}
           />
         ))}
@@ -78,7 +78,7 @@ export function PrintPreview({ layout, showExample }: PrintPreviewProps) {
           y1={layout.bodyBox.y}
           x2={layout.contentBox.x + layout.contentBox.width}
           y2={layout.bodyBox.y}
-          stroke="#111111"
+          stroke="var(--board-stroke)"
           strokeWidth={gridStrokeWidths.inner}
         />
         {layout.rowLines.slice(1, -1).map((line) => (
@@ -88,7 +88,7 @@ export function PrintPreview({ layout, showExample }: PrintPreviewProps) {
             y1={line}
             x2={layout.contentBox.x + layout.contentBox.width}
             y2={line}
-            stroke="#111111"
+            stroke="var(--board-stroke)"
             strokeWidth={gridStrokeWidths.inner}
           />
         ))}
@@ -99,8 +99,8 @@ export function PrintPreview({ layout, showExample }: PrintPreviewProps) {
             y={layout.headerBox.y + CELL_PADDING_Y + HEADER_FONT_SIZE}
             fontSize={HEADER_FONT_SIZE}
             fontWeight="700"
-            fill="#111111"
-            fontFamily="var(--font-display)"
+            fill="var(--board-ink)"
+            fontFamily="'Playfair Display', Georgia, serif"
           >
             {column.headerLines.map((line, index) => (
               <tspan
@@ -117,8 +117,8 @@ export function PrintPreview({ layout, showExample }: PrintPreviewProps) {
           x={layout.contentBox.x}
           y={layout.footerBox.y + FOOTER_HEIGHT - 4}
           fontSize="8.5"
-          fill="#6b7280"
-          fontFamily="var(--font-body)"
+          fill="var(--board-ink-soft)"
+          fontFamily="'Source Sans 3', sans-serif"
         >
           {layout.pageSize.toUpperCase()} / {layout.orientation}
         </text>
@@ -142,9 +142,9 @@ export function PrintPreview({ layout, showExample }: PrintPreviewProps) {
                       key={column.key}
                       x={column.x + CELL_PADDING_X}
                       y={y}
-                      fill="#2452a5"
+                      fill="var(--board-data)"
                       fontSize="10"
-                      fontFamily="var(--font-ink)"
+                      fontFamily="'Caveat', cursive"
                       style={{ letterSpacing: '0.01em' }}
                     >
                       {value}
