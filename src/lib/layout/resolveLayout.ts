@@ -18,6 +18,7 @@ import {
   TITLE_LINE_HEIGHT,
   getPageDimensions,
 } from './constants';
+import { PDF_HEADING_FONT_FAMILY } from './fonts';
 import { wrapTextByWords } from './textWrap';
 import { validateLayout } from './validation';
 import { getResolvedColumns, normalizeTemplate } from '../template/normalize';
@@ -25,7 +26,6 @@ import type { ColumnWidthPreset, TemplateV1 } from '../template/types';
 import type { ResolvedLayout, ResolvedLayoutColumn } from './types';
 
 const MIN_BODY_HEIGHT = MIN_ROW_HEIGHT;
-const PDF_FONT_FAMILY = 'Helvetica, Arial, sans-serif';
 
 interface ResolveLayoutOptions {
   headingFontFamily?: string;
@@ -128,7 +128,7 @@ export function resolveLayout(
   options: ResolveLayoutOptions = {}
 ): ResolvedLayout {
   const template = normalizeTemplate(templateInput);
-  const headingFontFamily = options.headingFontFamily ?? PDF_FONT_FAMILY;
+  const headingFontFamily = options.headingFontFamily ?? PDF_HEADING_FONT_FAMILY;
   const page = getPageDimensions(template.layout.pageSize, template.layout.orientation);
   const margins = {
     top: PAGE_MARGIN_INCHES.top * POINTS_PER_INCH,
@@ -143,7 +143,7 @@ export function resolveLayout(
     height: page.height - margins.top - margins.bottom,
   };
   const maxReservedHeight = Math.max(printableBox.height - MIN_BODY_HEIGHT, 0);
-  const titleLines = wrapTextByWords(
+  const wrappedTitleLines = wrapTextByWords(
     template.title,
     printableBox.width,
     TITLE_FONT_SIZE,
@@ -154,8 +154,10 @@ export function resolveLayout(
     x: printableBox.x,
     y: printableBox.y,
     width: printableBox.width,
-    height: Math.min(titleLines.length * TITLE_LINE_HEIGHT, maxReservedHeight),
+    height: Math.min(wrappedTitleLines.length * TITLE_LINE_HEIGHT, maxReservedHeight),
   };
+  const maxTitleLineCount = Math.floor(titleBox.height / TITLE_LINE_HEIGHT);
+  const titleLines = wrappedTitleLines.slice(0, maxTitleLineCount);
   const contentBox = {
     x: printableBox.x,
     y: titleBox.y + titleBox.height + TITLE_GAP,
@@ -186,13 +188,24 @@ export function resolveLayout(
       width = widths.notesWidth;
     }
 
-    const headerLines = wrapTextByWords(
+    const wrappedHeaderLines = wrapTextByWords(
       column.header,
       Math.max(width - CELL_PADDING_X * 2, 1),
       HEADER_FONT_SIZE,
       'bold',
       headingFontFamily
     );
+    const maxHeaderHeight = Math.min(
+      Math.max(
+        HEADER_HEIGHT,
+        wrappedHeaderLines.length * HEADER_LINE_HEIGHT + CELL_PADDING_Y * 2
+      ),
+      maxReservedHeight
+    );
+    const maxHeaderLineCount = Math.floor(
+      Math.max(maxHeaderHeight - CELL_PADDING_Y * 2, 0) / HEADER_LINE_HEIGHT
+    );
+    const headerLines = wrappedHeaderLines.slice(0, maxHeaderLineCount);
     const resolvedColumn = {
       ...column,
       x: currentX,

@@ -1,5 +1,8 @@
-import { useState, useTransition } from 'react';
-import { PREVIEW_HEADING_FONT_FAMILY } from '@/lib/layout/fonts';
+import { useState } from 'react';
+import {
+  PDF_HEADING_FONT_FAMILY,
+  PREVIEW_HEADING_FONT_FAMILY,
+} from '@/lib/layout/fonts';
 import { resolveLayout } from '@/lib/layout/resolveLayout';
 import { downloadPdf } from '@/lib/pdf/downloadPdf';
 import {
@@ -57,15 +60,12 @@ export function LogBuilderApp() {
   const [showExample, setShowExample] = useState(true);
   const [downloadError, setDownloadError] = useState<string | null>(null);
   const [isDownloading, setIsDownloading] = useState(false);
-  const [isPending, startTransition] = useTransition();
   const layout = resolveLayout(template, {
     headingFontFamily: PREVIEW_HEADING_FONT_FAMILY,
   });
 
   function updateTemplate(updater: (current: TemplateV1) => TemplateV1) {
-    startTransition(() => {
-      setTemplate((current) => updater(current));
-    });
+    setTemplate((current) => updater(current));
   }
 
   async function handleDownload() {
@@ -73,7 +73,10 @@ export function LogBuilderApp() {
     setIsDownloading(true);
 
     try {
-      await downloadPdf(layout);
+      const pdfLayout = resolveLayout(template, {
+        headingFontFamily: PDF_HEADING_FONT_FAMILY,
+      });
+      await downloadPdf(pdfLayout);
     } catch (error) {
       console.error('PDF download failed:', error);
       setDownloadError(
@@ -197,7 +200,7 @@ export function LogBuilderApp() {
                 type="button"
                 className="primary-button"
                 onClick={() => void handleDownload()}
-                disabled={isPending || isDownloading}
+                disabled={isDownloading}
               >
                 {isDownloading ? (
                   'Preparing…'

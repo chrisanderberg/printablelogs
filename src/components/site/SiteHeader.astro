@@ -105,15 +105,19 @@ const aboutHref = withBasePath(import.meta.env.BASE_URL, 'about/');
     );
   }
 
+  const toggles = document.querySelectorAll('[data-theme-toggle]');
+
   function syncThemeToggleButtons() {
-    document.querySelectorAll('[data-theme-toggle]').forEach((button) => {
-      button.setAttribute('aria-pressed', isDarkThemeActive() ? 'true' : 'false');
+    const isPressed = isDarkThemeActive() ? 'true' : 'false';
+
+    toggles.forEach((button) => {
+      button.setAttribute('aria-pressed', isPressed);
     });
   }
 
   syncThemeToggleButtons();
 
-  document.querySelectorAll('[data-theme-toggle]').forEach((button) => {
+  toggles.forEach((button) => {
     button.addEventListener('click', () => {
       window.__toggleTheme?.();
       syncThemeToggleButtons();

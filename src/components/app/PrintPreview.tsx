@@ -24,6 +24,9 @@ interface PrintPreviewProps {
 
 export function PrintPreview({ layout, showExample }: PrintPreviewProps) {
   const exampleRows = getExampleRows();
+  const maxVisibleRows =
+    layout.rowHeight > 0 ? Math.floor(layout.bodyBox.height / layout.rowHeight) : 0;
+  const visibleExampleRows = exampleRows.slice(0, maxVisibleRows);
 
   return (
     <PageFrame layout={layout} className="preview-shell">
@@ -128,7 +131,7 @@ export function PrintPreview({ layout, showExample }: PrintPreviewProps) {
           {layout.pageSize.toUpperCase()} / {layout.orientation}
         </text>
         {showExample &&
-          exampleRows.map((row, rowIndex) => {
+          visibleExampleRows.map((row, rowIndex) => {
             const exampleFontSize = Math.min(layout.rowHeight * 0.55, 12);
             const y =
               layout.bodyBox.y + rowIndex * layout.rowHeight + layout.rowHeight * 0.65;
