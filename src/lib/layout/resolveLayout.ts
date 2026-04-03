@@ -214,7 +214,7 @@ export function resolveLayout(
       maxHeaderHeight
     );
     const maxHeaderLineCount = Math.floor(
-      cappedHeaderHeight / HEADER_LINE_HEIGHT
+      Math.max(0, cappedHeaderHeight - CELL_PADDING_Y * 2) / HEADER_LINE_HEIGHT
     );
     const headerLines = wrappedHeaderLines.slice(0, maxHeaderLineCount);
     const resolvedColumn = {
