@@ -445,6 +445,38 @@ button {
   border-color: var(--surface-border);
 }
 
+.metric-drag-handle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  padding: 0.25rem 0;
+  color: var(--ink-black-soft);
+  opacity: 0.35;
+  cursor: grab;
+  transition: opacity var(--transition-fast);
+}
+
+.metric-row:hover .metric-drag-handle {
+  opacity: 0.65;
+}
+
+.metric-row[draggable] {
+  cursor: default;
+}
+
+.metric-row.is-dragging {
+  opacity: 0.35;
+}
+
+.metric-row.is-drop-before {
+  box-shadow: inset 0 2px 0 0 var(--ink-blue), var(--shadow-inset);
+}
+
+.metric-row.is-drop-after {
+  box-shadow: inset 0 -2px 0 0 var(--ink-blue), var(--shadow-inset);
+}
+
 /* ============================================================
    PREVIEW PANEL TOOLBAR
    ============================================================ */
@@ -644,11 +676,6 @@ button {
 
   .builder-panel {
     position: static;
-  }
-
-  /* Preview appears above settings on small screens */
-  .preview-panel {
-    order: -1;
   }
 }
 

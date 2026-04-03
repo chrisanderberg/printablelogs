@@ -1,30 +1,10 @@
-import type { TimeGranularity } from '../template/types';
-
 export interface ExampleRow {
   time: string;
   metrics: string[];
   notes: string;
 }
 
-const DAILY_ROWS: ExampleRow[] = [
-  {
-    time: '03/28',
-    metrics: ['7.4', '0', '0', '10'],
-    notes: 'Fed lightly',
-  },
-  {
-    time: '03/29',
-    metrics: ['7.5', '0', '0', '15'],
-    notes: 'Top-off + trim',
-  },
-  {
-    time: '03/30',
-    metrics: ['7.4', '0', '0', '20'],
-    notes: 'Water change',
-  },
-];
-
-const CONTINUOUS_ROWS: ExampleRow[] = [
+const EXAMPLE_ROWS: ExampleRow[] = [
   {
     time: '03/28 08:10',
     metrics: ['7.4', '0', '0', '10'],
@@ -42,6 +22,6 @@ const CONTINUOUS_ROWS: ExampleRow[] = [
   },
 ];
 
-export function getExampleRows(granularity: TimeGranularity): ExampleRow[] {
-  return granularity === 'daily' ? DAILY_ROWS : CONTINUOUS_ROWS;
+export function getExampleRows(): ExampleRow[] {
+  return EXAMPLE_ROWS;
 }

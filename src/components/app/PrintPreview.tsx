@@ -18,7 +18,7 @@ interface PrintPreviewProps {
 }
 
 export function PrintPreview({ layout, showExample }: PrintPreviewProps) {
-  const exampleRows = getExampleRows(layout.timeGranularity);
+  const exampleRows = getExampleRows();
 
   return (
     <PageFrame layout={layout} className="preview-shell">
@@ -124,8 +124,9 @@ export function PrintPreview({ layout, showExample }: PrintPreviewProps) {
         </text>
         {showExample &&
           exampleRows.map((row, rowIndex) => {
+            const exampleFontSize = Math.min(layout.rowHeight * 0.55, 12);
             const y =
-              layout.bodyBox.y + rowIndex * layout.rowHeight + CELL_PADDING_Y + 10;
+              layout.bodyBox.y + rowIndex * layout.rowHeight + layout.rowHeight * 0.65;
 
             return (
               <g key={`${row.time}-${rowIndex}`}>
@@ -143,7 +144,7 @@ export function PrintPreview({ layout, showExample }: PrintPreviewProps) {
                       x={column.x + CELL_PADDING_X}
                       y={y}
                       fill="var(--board-data)"
-                      fontSize="10"
+                      fontSize={exampleFontSize}
                       fontFamily="'Caveat', cursive"
                       style={{ letterSpacing: '0.01em' }}
                     >

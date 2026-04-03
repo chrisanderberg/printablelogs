@@ -153,7 +153,7 @@ export function resolveLayout(templateInput: TemplateV1): ResolvedLayout {
     contentBox.width,
     metricCount,
     template.layout.widthPreset,
-    template.timeGranularity === 'daily'
+    false
   );
   const columns = getResolvedColumns(template, widths.metricWidths.length);
 

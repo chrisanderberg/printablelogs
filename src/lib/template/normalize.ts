@@ -43,8 +43,7 @@ export function getResolvedColumns(
   template: TemplateV1,
   metricCount: number = template.metricColumns.length
 ): ResolvedTemplateColumn[] {
-  const timeHeader =
-    template.timeGranularity === 'daily' ? 'Date' : 'Date / Time';
+  const timeHeader = 'Date / Time';
   const metricColumns = template.metricColumns.slice(0, metricCount).map((column) => ({
     key: column.id,
     header: column.header,

@@ -24,6 +24,14 @@ function moveItem<T>(values: T[], index: number, direction: -1 | 1) {
   return nextValues;
 }
 
+function reorderItem<T>(items: T[], from: number, to: number): T[] {
+  if (from === to) return items;
+  const result = [...items];
+  const [moved] = result.splice(from, 1);
+  result.splice(to, 0, moved);
+  return result;
+}
+
 export function LogBuilderApp() {
   const [template, setTemplate] = useState<TemplateV1>(() => ({
     ...DEFAULT_TEMPLATE,
@@ -73,14 +81,10 @@ export function LogBuilderApp() {
         <aside className="builder-panel">
           <TemplateForm
             title={template.title}
-            timeGranularity={template.timeGranularity}
             metricColumns={template.metricColumns}
             layout={template.layout}
             onTitleChange={(value) =>
               updateTemplate((current) => ({ ...current, title: value }))
-            }
-            onGranularityChange={(value) =>
-              updateTemplate((current) => ({ ...current, timeGranularity: value }))
             }
             onMetricChange={(id, value) =>
               updateTemplate((current) => {
@@ -107,6 +111,12 @@ export function LogBuilderApp() {
                   current.metricColumns.findIndex((column) => column.id === id),
                   direction
                 ),
+              }))
+            }
+            onReorderMetric={(from, to) =>
+              updateTemplate((current) => ({
+                ...current,
+                metricColumns: reorderItem(current.metricColumns, from, to),
               }))
             }
             onRemoveMetric={(id) =>

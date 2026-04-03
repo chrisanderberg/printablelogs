@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react';
 import type {
   ColumnWidthPreset,
   Orientation,
@@ -23,6 +24,24 @@ export function LayoutControls({
   onRowsPerPageChange,
   onWidthPresetChange,
 }: LayoutControlsProps) {
+  const [rowsInput, setRowsInput] = useState(String(layout.rowsPerPage));
+
+  // Keep local input in sync if parent value changes externally
+  useEffect(() => {
+    setRowsInput(String(layout.rowsPerPage));
+  }, [layout.rowsPerPage]);
+
+  function commitRows(raw: string) {
+    const parsed = Number.parseInt(raw, 10);
+    if (Number.isNaN(parsed)) {
+      setRowsInput(String(layout.rowsPerPage));
+      return;
+    }
+    const clamped = Math.min(MAX_ROWS_PER_PAGE, Math.max(MIN_ROWS_PER_PAGE, parsed));
+    onRowsPerPageChange(clamped);
+    setRowsInput(String(clamped));
+  }
+
   return (
     <div className="builder-section">
       <div className="builder-section__heading">
@@ -33,24 +52,22 @@ export function LayoutControls({
       </div>
       <fieldset className="segmented-field">
         <legend>Orientation</legend>
-        <div className="choice-grid" role="group" aria-label="Orientation">
+        <div className="segmented-control">
           <button
             type="button"
-            className={`choice-card ${layout.orientation === 'portrait' ? 'is-active' : ''}`}
+            className={layout.orientation === 'portrait' ? 'is-active' : ''}
             onClick={() => onOrientationChange('portrait')}
             aria-pressed={layout.orientation === 'portrait'}
           >
-            <strong>Portrait</strong>
-            <span>Classic page shape with fewer columns and more vertical room.</span>
+            Portrait
           </button>
           <button
             type="button"
-            className={`choice-card ${layout.orientation === 'landscape' ? 'is-active' : ''}`}
+            className={layout.orientation === 'landscape' ? 'is-active' : ''}
             onClick={() => onOrientationChange('landscape')}
             aria-pressed={layout.orientation === 'landscape'}
           >
-            <strong>Landscape</strong>
-            <span>Best for fitting more metric columns before space runs out.</span>
+            Landscape
           </button>
         </div>
       </fieldset>
@@ -71,20 +88,11 @@ export function LayoutControls({
             type="number"
             min={MIN_ROWS_PER_PAGE}
             max={MAX_ROWS_PER_PAGE}
-            value={layout.rowsPerPage}
-            onChange={(event) => {
-              const parsedValue = Number.parseInt(event.target.value, 10);
-
-              if (Number.isNaN(parsedValue)) {
-                return;
-              }
-
-              onRowsPerPageChange(
-                Math.min(
-                  MAX_ROWS_PER_PAGE,
-                  Math.max(MIN_ROWS_PER_PAGE, parsedValue)
-                )
-              );
+            value={rowsInput}
+            onChange={(event) => setRowsInput(event.target.value)}
+            onBlur={(event) => commitRows(event.target.value)}
+            onKeyDown={(event) => {
+              if (event.key === 'Enter') commitRows(event.currentTarget.value);
             }}
           />
         </label>
