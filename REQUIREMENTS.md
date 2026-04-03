@@ -16,18 +16,18 @@ captures the requirements that should guide implementation and review.
 - The site shall be implemented as a static Astro site.
 - The hosting target shall be GitHub Pages.
 - MVP shall focus on printable table-log generation only.
-- MVP shall not include calendar logs, digitization, or data visualization.
+- MVP shall not include calendar-style daily logs, digitization, or data
+  visualization.
 - The site shall not require a backend, authentication, accounts, or cloud sync
   for core functionality.
 - The primary user flow shall support:
   - title input
-  - time granularity selection for daily vs continuous-time logs
+  - continuous time/date-time rows for the current log type
   - metric column header inputs
   - a notes column that is always present and always final
   - print-ready PDF export
 - The product shall support Letter and A4 paper sizes.
 - The product shall support portrait and landscape orientation.
-- The preview and export output shall stay closely aligned.
 - Any persistence in MVP shall be local-only and optional.
 
 ## Soft requirements
@@ -39,11 +39,15 @@ captures the requirements that should guide implementation and review.
 - Use black, blue, and red as the primary ink-language colors in the UI, with
   red reserved for abnormal states such as layout warnings and export/download
   failures.
+- Keep the on-screen preview structurally aligned with the exported PDF, even if
+  exact visual fidelity is refined later.
 - Keep abnormal-state styling consistent with the skeuomorphic writing metaphor
   rather than using generic dashboard status colors.
 - Optimize line weights, spacing, and hierarchy for real home-printer output.
 - Keep the core generator approachable and low-friction.
 - Do not introduce unnecessary metric schemas when header strings are enough.
+- Reserve daily/calendar-style logs for a later log type rather than folding
+  them into this MVP flow.
 - If heavier future features are added later, load them only where needed.
 
 ## Implementation structure
