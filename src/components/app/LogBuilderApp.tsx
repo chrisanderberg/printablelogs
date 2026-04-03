@@ -1,0 +1,241 @@
+import { useState } from 'react';
+import {
+  PDF_HEADING_FONT_FAMILY,
+  PREVIEW_HEADING_FONT_FAMILY,
+} from '@/lib/layout/fonts';
+import { resolveLayout } from '@/lib/layout/resolveLayout';
+import { downloadPdf } from '@/lib/pdf/downloadPdf';
+import {
+  cloneMetricColumns,
+  createMetricColumn,
+  DEFAULT_TEMPLATE,
+} from '@/lib/template/defaults';
+import type { TemplateV1 } from '@/lib/template/types';
+import { PrintPreview } from './PrintPreview';
+import { TemplateForm } from './TemplateForm';
+
+function moveItem<T>(values: T[], index: number, direction: -1 | 1) {
+  if (!Number.isInteger(index) || index < 0 || index >= values.length) {
+    return values;
+  }
+
+  const nextIndex = index + direction;
+
+  if (nextIndex < 0 || nextIndex >= values.length) {
+    return values;
+  }
+
+  const nextValues = [...values];
+  const current = nextValues[index];
+  nextValues[index] = nextValues[nextIndex];
+  nextValues[nextIndex] = current;
+  return nextValues;
+}
+
+function reorderItem<T>(items: T[], from: number, to: number): T[] {
+  if (
+    !Number.isInteger(from) ||
+    from < 0 ||
+    from >= items.length ||
+    !Number.isInteger(to) ||
+    to < 0 ||
+    to > items.length ||
+    from === to
+  ) {
+    return items;
+  }
+
+  if (from === to) return items;
+  const result = [...items];
+  const [moved] = result.splice(from, 1);
+  result.splice(to, 0, moved);
+  return result;
+}
+
+export function LogBuilderApp() {
+  const [template, setTemplate] = useState<TemplateV1>(() => ({
+    ...DEFAULT_TEMPLATE,
+    metricColumns: cloneMetricColumns(DEFAULT_TEMPLATE.metricColumns),
+  }));
+  const [showExample, setShowExample] = useState(true);
+  const [downloadError, setDownloadError] = useState<string | null>(null);
+  const [isDownloading, setIsDownloading] = useState(false);
+  const layout = resolveLayout(template, {
+    headingFontFamily: PREVIEW_HEADING_FONT_FAMILY,
+  });
+
+  function updateTemplate(updater: (current: TemplateV1) => TemplateV1) {
+    setTemplate((current) => updater(current));
+  }
+
+  async function handleDownload() {
+    setDownloadError(null);
+    setIsDownloading(true);
+
+    try {
+      const pdfLayout = resolveLayout(template, {
+        headingFontFamily: PDF_HEADING_FONT_FAMILY,
+      });
+      await downloadPdf(pdfLayout);
+    } catch (error) {
+      console.error('PDF download failed:', error);
+      setDownloadError(
+        error instanceof Error
+          ? `The PDF could not be created right now. ${error.message}`
+          : 'The PDF could not be created right now. Try again in a moment.'
+      );
+    } finally {
+      setIsDownloading(false);
+    }
+  }
+
+  return (
+    <section className="builder-app">
+      <div className="builder-app__intro">
+        <p className="builder-kicker">Print-first log builder</p>
+        <h1>Make a clean tracking sheet faster than drawing one by hand.</h1>
+        <p className="builder-intro-copy">
+          Configure the table, preview the printed page, then export a toner-friendly PDF for Letter or A4.
+        </p>
+      </div>
+
+      <div className="builder-app__grid">
+        <aside className="builder-panel">
+          <TemplateForm
+            title={template.title}
+            metricColumns={template.metricColumns}
+            layout={template.layout}
+            onTitleChange={(value) =>
+              updateTemplate((current) => ({ ...current, title: value }))
+            }
+            onMetricChange={(id, value) =>
+              updateTemplate((current) => {
+                const metricColumns = current.metricColumns.map((column) =>
+                  column.id === id ? { ...column, header: value } : column
+                );
+                return { ...current, metricColumns };
+              })
+            }
+            onAddMetric={() =>
+              updateTemplate((current) => ({
+                ...current,
+                metricColumns: [
+                  ...current.metricColumns,
+                  createMetricColumn(`Metric ${current.metricColumns.length + 1}`),
+                ],
+              }))
+            }
+            onMoveMetric={(id, direction) =>
+              updateTemplate((current) => ({
+                ...current,
+                metricColumns: moveItem(
+                  current.metricColumns,
+                  current.metricColumns.findIndex((column) => column.id === id),
+                  direction
+                ),
+              }))
+            }
+            onReorderMetric={(from, to) =>
+              updateTemplate((current) => ({
+                ...current,
+                metricColumns: reorderItem(current.metricColumns, from, to),
+              }))
+            }
+            onRemoveMetric={(id) =>
+              updateTemplate((current) => ({
+                ...current,
+                metricColumns: current.metricColumns.filter((column) => column.id !== id),
+              }))
+            }
+            onPageSizeChange={(value) =>
+              updateTemplate((current) => ({
+                ...current,
+                layout: { ...current.layout, pageSize: value },
+              }))
+            }
+            onOrientationChange={(value) =>
+              updateTemplate((current) => ({
+                ...current,
+                layout: { ...current.layout, orientation: value },
+              }))
+            }
+            onRowsPerPageChange={(value) =>
+              updateTemplate((current) => ({
+                ...current,
+                layout: { ...current.layout, rowsPerPage: value },
+              }))
+            }
+            onWidthPresetChange={(value) =>
+              updateTemplate((current) => ({
+                ...current,
+                layout: { ...current.layout, widthPreset: value },
+              }))
+            }
+          />
+        </aside>
+
+        <div className="preview-panel">
+          <div className="preview-panel__toolbar">
+            <div>
+              <p className="builder-label">Preview</p>
+              <h2>{layout.title}</h2>
+              <p className="builder-note">
+                {layout.orientation === 'landscape'
+                  ? `Landscape is active. ${layout.visibleMetricCount} metric columns fit on this page.`
+                  : layout.hiddenMetricCount > 0
+                    ? `Portrait is active. ${layout.hiddenMetricCount} metric column${layout.hiddenMetricCount === 1 ? '' : 's'} will be hidden unless you switch to landscape or remove some columns.`
+                    : `Portrait is active. ${layout.visibleMetricCount} metric columns fit on this page.`}
+              </p>
+            </div>
+            <div className="preview-panel__actions">
+              <label className="toggle-field">
+                <input
+                  type="checkbox"
+                  checked={showExample}
+                  onChange={(event) => setShowExample(event.target.checked)}
+                />
+                <span>Show filled example</span>
+              </label>
+              <button
+                type="button"
+                className="primary-button"
+                onClick={() => void handleDownload()}
+                disabled={isDownloading}
+              >
+                {isDownloading ? (
+                  'Preparing…'
+                ) : (
+                  <>
+                    <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                      <path d="M7 1v8M7 9l-3-3M7 9l3-3"/>
+                      <path d="M1 11v1.5A.5.5 0 0 0 1.5 13h11a.5.5 0 0 0 .5-.5V11"/>
+                    </svg>
+                    Download PDF
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+
+          {layout.warnings.length > 0 && (
+            <div className="notice-stack" aria-live="polite">
+              {layout.warnings.map((warning) => (
+                <p key={warning.id} className="notice-card notice-card--warning">
+                  {warning.message}
+                </p>
+              ))}
+            </div>
+          )}
+
+          {downloadError && (
+            <div className="notice-stack" aria-live="polite">
+              <p className="notice-card notice-card--error">{downloadError}</p>
+            </div>
+          )}
+
+          <PrintPreview layout={layout} showExample={showExample} />
+        </div>
+      </div>
+    </section>
+  );
+}

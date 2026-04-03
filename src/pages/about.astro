@@ -1,0 +1,46 @@
+---
+import SiteLayout from '../layouts/SiteLayout.astro';
+import { REPO_ROOT } from '../lib/github';
+---
+
+<SiteLayout
+  title="About | printablelogs"
+  description="Project framing and intended product shape for printablelogs."
+>
+  <section class="container prose-block">
+    <p class="eyebrow">/ about</p>
+    <h1>About printablelogs</h1>
+    <p>
+      printablelogs is a print-first tool for making handwriting-friendly
+      tracking sheets faster than drawing them by hand.
+    </p>
+    <p>
+      The current MVP focuses on one job: configuring a table log, previewing it
+      as a printable page, and exporting a clean one-page PDF for Letter or A4
+      in portrait or landscape.
+    </p>
+    <p>
+      The longer-term product vision includes digitization and visualization, but
+      those are intentionally out of scope for now. Planned requirements live in
+      the root docs, and source lives on
+      <a href={REPO_ROOT} target="_blank" rel="noreferrer"> GitHub</a>.
+    </p>
+  </section>
+</SiteLayout>
+
+<style>
+  .prose-block {
+    padding: 5rem 0;
+    max-width: 46rem;
+  }
+
+  .eyebrow {
+    color: var(--ink-blue);
+    text-transform: uppercase;
+    letter-spacing: 0.13em;
+    margin-bottom: 1rem;
+    font-family: var(--font-ui);
+    font-size: 0.72rem;
+    font-weight: 700;
+  }
+</style>

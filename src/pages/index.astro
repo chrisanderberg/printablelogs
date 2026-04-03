@@ -1,0 +1,19 @@
+---
+import SiteLayout from '../layouts/SiteLayout.astro';
+import { LogBuilderApp } from '../components/app/LogBuilderApp';
+---
+
+<SiteLayout
+  title="printablelogs"
+  description="Build print-ready tracking logs for analog-first workflows."
+>
+  <div class="builder-page container">
+    <LogBuilderApp client:load />
+  </div>
+</SiteLayout>
+
+<style>
+  .builder-page {
+    padding: 2.5rem 0 4rem;
+  }
+</style>

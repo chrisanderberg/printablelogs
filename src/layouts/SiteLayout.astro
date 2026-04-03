@@ -1,0 +1,117 @@
+---
+import '../styles/global.css';
+import SiteHeader from '../components/site/SiteHeader.astro';
+import { SITE_NAME, SITE_TAGLINE, withBasePath } from '../lib/site';
+
+interface Props {
+  title?: string;
+  description?: string;
+}
+
+const {
+  title = SITE_NAME,
+  description = SITE_TAGLINE,
+} = Astro.props;
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <link rel="icon" type="image/svg+xml" href={withBasePath(import.meta.env.BASE_URL, 'favicon.svg')} />
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Source+Sans+3:wght@400;600&family=Caveat:wght@400;700&display=swap"
+      fetchpriority="high"
+      rel="stylesheet"
+    />
+
+    <!-- Prevent flash of wrong theme -->
+    <script is:inline>
+      (function () {
+        function getStoredTheme() {
+          try {
+            return localStorage.getItem('theme');
+          } catch {
+            return null;
+          }
+        }
+
+        var stored = getStoredTheme();
+        var prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        if (stored === 'dark' || (!stored && prefersDark)) {
+          document.documentElement.dataset.theme = 'dark';
+        } else if (stored === 'light') {
+          document.documentElement.dataset.theme = 'light';
+        }
+      })();
+    </script>
+  </head>
+  <body>
+    <SiteHeader />
+    <main>
+      <slot />
+    </main>
+
+    <!-- Theme toggle function + system preference listener -->
+    <script is:inline>
+      function getStoredTheme() {
+        try {
+          return localStorage.getItem('theme');
+        } catch {
+          return null;
+        }
+      }
+
+      function setStoredTheme(theme) {
+        try {
+          localStorage.setItem('theme', theme);
+        } catch {
+          // Keep theme switching functional even if storage is unavailable.
+        }
+      }
+
+      function emitThemeChange(theme) {
+        window.dispatchEvent(new CustomEvent('themechange', { detail: { theme } }));
+      }
+
+      window.__toggleTheme = function () {
+        var html = document.documentElement;
+        var current = html.dataset.theme;
+        var isDark =
+          current === 'dark' ||
+          (!current && window.matchMedia('(prefers-color-scheme: dark)').matches);
+        var next = isDark ? 'light' : 'dark';
+        html.dataset.theme = next;
+        setStoredTheme(next);
+        emitThemeChange(next);
+      };
+
+      var mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+      var handleThemePreferenceChange = function (e) {
+        if (!getStoredTheme()) {
+          var nextTheme = e.matches ? 'dark' : 'light';
+          document.documentElement.dataset.theme = nextTheme;
+          emitThemeChange(nextTheme);
+        }
+      };
+
+      emitThemeChange(
+        document.documentElement.dataset.theme ||
+        (mediaQuery.matches ? 'dark' : 'light')
+      );
+
+      if (typeof mediaQuery.addEventListener === 'function') {
+        mediaQuery.addEventListener('change', handleThemePreferenceChange);
+      } else if (typeof mediaQuery.addListener === 'function') {
+        mediaQuery.addListener(handleThemePreferenceChange);
+      }
+    </script>
+  </body>
+</html>

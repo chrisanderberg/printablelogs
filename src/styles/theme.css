@@ -1,0 +1,151 @@
+@keyframes fade-slide-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+:root {
+  /* --- Ink colors --- */
+  --ink-black: #1a1a1a;
+  --ink-black-soft: #4a4540;
+  --ink-blue: #1b4daa;
+  --ink-blue-hover: #1440a0;
+  --ink-blue-soft: rgba(27, 77, 170, 0.10);
+  --ink-blue-wash: rgba(27, 77, 170, 0.05);
+  --ink-red: #b5312c;
+  --ink-red-soft: rgba(181, 49, 44, 0.08);
+  --ink-red-wash: rgba(181, 49, 44, 0.04);
+
+  /* --- Paper surfaces --- */
+  --paper: #faf8f4;
+  --paper-bright: #fffef9;
+
+  /* --- Desk surfaces --- */
+  --desk: #dbd3c2;
+  --desk-dark: #c0b49e;
+  --desk-groove: rgba(0, 0, 0, 0.06);
+
+  /* --- UI surfaces --- */
+  --surface: #edeae3;
+  --surface-elevated: #f5f2eb;
+  --surface-border: rgba(26, 26, 26, 0.11);
+  --surface-border-strong: rgba(26, 26, 26, 0.22);
+
+  /* --- Board (preview sheet) --- */
+  --board-bg: #fffef9;
+  --board-ink: #111111;
+  --board-ink-soft: #6b7280;
+  --board-stroke: #111111;
+  --board-data: #1b4daa;
+
+  /* --- Shadows --- */
+  --shadow-paper: 0 2px 4px rgba(0, 0, 0, 0.04), 0 8px 24px rgba(0, 0, 0, 0.08), 0 24px 48px rgba(0, 0, 0, 0.06);
+  --shadow-lifted: 0 4px 8px rgba(0, 0, 0, 0.06), 0 16px 40px rgba(0, 0, 0, 0.13), 0 32px 64px rgba(0, 0, 0, 0.09);
+  --shadow-inset: inset 0 1px 3px rgba(0, 0, 0, 0.07);
+  --shadow-emboss: inset 0 1px 0 rgba(255, 255, 255, 0.65), 0 1px 2px rgba(0, 0, 0, 0.10);
+  --shadow-card: 0 1px 3px rgba(0, 0, 0, 0.05), 0 4px 12px rgba(0, 0, 0, 0.07);
+
+  /* --- Typography --- */
+  --font-display: "Playfair Display", "Georgia", "Times New Roman", serif;
+  --font-ui: 'Source Sans 3', 'Segoe UI', system-ui, sans-serif;
+  --font-body: 'Source Sans 3', 'Segoe UI', system-ui, sans-serif;
+  --font-ink: 'Caveat', 'Segoe Print', cursive;
+
+  /* --- Radii --- */
+  --radius-sm: 0.375rem;
+  --radius-md: 0.625rem;
+  --radius-lg: 1rem;
+
+  /* --- Transitions --- */
+  --transition-fast: 120ms ease;
+  --transition-base: 200ms ease;
+  --transition-slow: 350ms cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* --- Layout --- */
+  --content-width: 90rem;
+}
+
+/* ---- Dark mode (explicit toggle) ---- */
+[data-theme="dark"] {
+  --ink-black: #e8e6e1;
+  --ink-black-soft: #b0ada6;
+  --ink-blue: #5b9cf5;
+  --ink-blue-hover: #7bb3ff;
+  --ink-blue-soft: rgba(91, 156, 245, 0.12);
+  --ink-blue-wash: rgba(91, 156, 245, 0.06);
+  --ink-red: #ef6b66;
+  --ink-red-soft: rgba(239, 107, 102, 0.10);
+  --ink-red-wash: rgba(239, 107, 102, 0.05);
+
+  /* Warm dark browns instead of cold grays */
+  --paper: #322b24;
+  --paper-bright: #382f28;
+
+  --desk: #1c1713;
+  --desk-dark: #13100c;
+  --desk-groove: rgba(180, 155, 120, 0.05);
+
+  --surface: #251f1a;
+  --surface-elevated: #2e2721;
+  --surface-border: rgba(195, 170, 140, 0.10);
+  --surface-border-strong: rgba(195, 170, 140, 0.17);
+
+  --shadow-paper: 0 2px 4px rgba(0, 0, 0, 0.2), 0 8px 24px rgba(0, 0, 0, 0.3), 0 24px 48px rgba(0, 0, 0, 0.2);
+  --shadow-lifted: 0 4px 8px rgba(0, 0, 0, 0.3), 0 16px 40px rgba(0, 0, 0, 0.4), 0 32px 64px rgba(0, 0, 0, 0.3);
+  --shadow-inset: inset 0 1px 3px rgba(0, 0, 0, 0.3);
+  --shadow-emboss: inset 0 1px 0 rgba(255, 255, 255, 0.06), 0 1px 2px rgba(0, 0, 0, 0.4);
+  --shadow-card: 0 1px 3px rgba(0, 0, 0, 0.2), 0 4px 12px rgba(0, 0, 0, 0.2);
+
+  /* Board (chalkboard) */
+  --board-bg: #2d2a26;
+  --board-ink: #dfdbd5;
+  --board-ink-soft: #8a857f;
+  --board-stroke: rgba(210, 206, 200, 0.30);
+  --board-data: #5b9cf5;
+}
+
+/* ---- Dark mode (system preference, no explicit choice) ---- */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --ink-black: #e8e6e1;
+    --ink-black-soft: #b0ada6;
+    --ink-blue: #5b9cf5;
+    --ink-blue-hover: #7bb3ff;
+    --ink-blue-soft: rgba(91, 156, 245, 0.12);
+    --ink-blue-wash: rgba(91, 156, 245, 0.06);
+    --ink-red: #ef6b66;
+    --ink-red-soft: rgba(239, 107, 102, 0.10);
+    --ink-red-wash: rgba(239, 107, 102, 0.05);
+
+    /* Warm dark browns instead of cold grays */
+    --paper: #322b24;
+    --paper-bright: #382f28;
+
+    --desk: #1c1713;
+    --desk-dark: #13100c;
+    --desk-groove: rgba(180, 155, 120, 0.05);
+
+    --surface: #251f1a;
+    --surface-elevated: #2e2721;
+    --surface-border: rgba(195, 170, 140, 0.10);
+    --surface-border-strong: rgba(195, 170, 140, 0.17);
+
+    --shadow-paper: 0 2px 4px rgba(0, 0, 0, 0.2), 0 8px 24px rgba(0, 0, 0, 0.3), 0 24px 48px rgba(0, 0, 0, 0.2);
+    --shadow-lifted: 0 4px 8px rgba(0, 0, 0, 0.3), 0 16px 40px rgba(0, 0, 0, 0.4), 0 32px 64px rgba(0, 0, 0, 0.3);
+    --shadow-inset: inset 0 1px 3px rgba(0, 0, 0, 0.3);
+    --shadow-emboss: inset 0 1px 0 rgba(255, 255, 255, 0.06), 0 1px 2px rgba(0, 0, 0, 0.4);
+    --shadow-card: 0 1px 3px rgba(0, 0, 0, 0.2), 0 4px 12px rgba(0, 0, 0, 0.2);
+
+    /* Board (chalkboard) */
+    --board-bg: #2d2a26;
+    --board-ink: #dfdbd5;
+    --board-ink-soft: #8a857f;
+    --board-stroke: rgba(210, 206, 200, 0.30);
+    --board-data: #5b9cf5;
+  }
+}
