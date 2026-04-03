@@ -71,45 +71,70 @@ export function LayoutControls({
           </button>
         </div>
       </fieldset>
-      <div className="field-grid">
-        <label className="field">
-          <span>Paper size</span>
-          <select
-            value={layout.pageSize}
-            onChange={(event) => onPageSizeChange(event.target.value as PageSize)}
+      <fieldset className="segmented-field">
+        <legend>Paper size</legend>
+        <div className="segmented-control">
+          <button
+            type="button"
+            className={layout.pageSize === 'letter' ? 'is-active' : ''}
+            onClick={() => onPageSizeChange('letter')}
+            aria-pressed={layout.pageSize === 'letter'}
           >
-            <option value="letter">Letter</option>
-            <option value="a4">A4</option>
-          </select>
-        </label>
-        <label className="field">
-          <span>Rows per page</span>
-          <input
-            type="number"
-            min={MIN_ROWS_PER_PAGE}
-            max={MAX_ROWS_PER_PAGE}
-            value={rowsInput}
-            onChange={(event) => setRowsInput(event.target.value)}
-            onBlur={(event) => commitRows(event.target.value)}
-            onKeyDown={(event) => {
-              if (event.key === 'Enter') commitRows(event.currentTarget.value);
-            }}
-          />
-        </label>
-        <label className="field">
-          <span>Width preset</span>
-          <select
-            value={layout.widthPreset}
-            onChange={(event) =>
-              onWidthPresetChange(event.target.value as ColumnWidthPreset)
-            }
+            Letter
+          </button>
+          <button
+            type="button"
+            className={layout.pageSize === 'a4' ? 'is-active' : ''}
+            onClick={() => onPageSizeChange('a4')}
+            aria-pressed={layout.pageSize === 'a4'}
           >
-            <option value="balanced">Balanced</option>
-            <option value="notes-heavy">Notes heavy</option>
-            <option value="metrics-heavy">Metrics heavy</option>
-          </select>
-        </label>
-      </div>
+            A4
+          </button>
+        </div>
+      </fieldset>
+      <fieldset className="segmented-field">
+        <legend>Column widths</legend>
+        <div className="segmented-control segmented-control--three">
+          <button
+            type="button"
+            className={layout.widthPreset === 'balanced' ? 'is-active' : ''}
+            onClick={() => onWidthPresetChange('balanced')}
+            aria-pressed={layout.widthPreset === 'balanced'}
+          >
+            Balanced
+          </button>
+          <button
+            type="button"
+            className={layout.widthPreset === 'notes-heavy' ? 'is-active' : ''}
+            onClick={() => onWidthPresetChange('notes-heavy')}
+            aria-pressed={layout.widthPreset === 'notes-heavy'}
+          >
+            Notes+
+          </button>
+          <button
+            type="button"
+            className={layout.widthPreset === 'metrics-heavy' ? 'is-active' : ''}
+            onClick={() => onWidthPresetChange('metrics-heavy')}
+            aria-pressed={layout.widthPreset === 'metrics-heavy'}
+          >
+            Metrics+
+          </button>
+        </div>
+      </fieldset>
+      <label className="field">
+        <span>Rows per page</span>
+        <input
+          type="number"
+          min={MIN_ROWS_PER_PAGE}
+          max={MAX_ROWS_PER_PAGE}
+          value={rowsInput}
+          onChange={(event) => setRowsInput(event.target.value)}
+          onBlur={(event) => commitRows(event.target.value)}
+          onKeyDown={(event) => {
+            if (event.key === 'Enter') commitRows(event.currentTarget.value);
+          }}
+        />
+      </label>
     </div>
   );
 }

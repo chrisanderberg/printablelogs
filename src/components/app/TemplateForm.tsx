@@ -26,6 +26,16 @@ interface TemplateFormProps {
 export function TemplateForm(props: TemplateFormProps) {
   return (
     <div className="builder-form">
+      <label className="field title-field">
+        <span>Log title</span>
+        <input
+          type="text"
+          value={props.title}
+          onChange={(event) => props.onTitleChange(event.target.value)}
+          placeholder="Aquarium Water Log"
+        />
+      </label>
+
       <LayoutControls
         layout={props.layout}
         onPageSizeChange={props.onPageSizeChange}
@@ -33,24 +43,6 @@ export function TemplateForm(props: TemplateFormProps) {
         onRowsPerPageChange={props.onRowsPerPageChange}
         onWidthPresetChange={props.onWidthPresetChange}
       />
-
-      <div className="builder-section">
-        <div className="builder-section__heading">
-          <div>
-            <p className="builder-label">Template details</p>
-            <h3>Name your log</h3>
-          </div>
-        </div>
-        <label className="field">
-          <span>Log title</span>
-          <input
-            type="text"
-            value={props.title}
-            onChange={(event) => props.onTitleChange(event.target.value)}
-            placeholder="Aquarium Water Log"
-          />
-        </label>
-      </div>
 
       <MetricColumnsEditor
         metricColumns={props.metricColumns}
