@@ -46,7 +46,7 @@ const aboutHref = withBasePath(import.meta.env.BASE_URL, 'about/');
       <nav class="site-header__nav" aria-label="Primary">
         <a href={homeHref}>Home</a>
         <a href={aboutHref}>About</a>
-        <a href={REPO_ROOT} target="_blank" rel="noreferrer">GitHub</a>
+        <a href={REPO_ROOT} target="_blank" rel="noreferrer noopener">GitHub</a>
       </nav>
 
       <!-- Dark mode toggle -->
@@ -131,8 +131,8 @@ const aboutHref = withBasePath(import.meta.env.BASE_URL, 'about/');
     background: var(--surface-elevated);
     border-bottom: 1px solid var(--surface-border);
     transition:
-      background-color 380ms ease,
-      border-color 380ms ease;
+      background-color var(--transition-base),
+      border-color var(--transition-base);
   }
 
   .site-header__inner {

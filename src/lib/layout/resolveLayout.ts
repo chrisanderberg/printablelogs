@@ -27,6 +27,10 @@ import type { ResolvedLayout, ResolvedLayoutColumn } from './types';
 const MIN_BODY_HEIGHT = MIN_ROW_HEIGHT;
 const PDF_FONT_FAMILY = 'Helvetica, Arial, sans-serif';
 
+interface ResolveLayoutOptions {
+  headingFontFamily?: string;
+}
+
 function getWidthPercentages(
   preset: ColumnWidthPreset,
   isDaily: boolean
@@ -101,7 +105,7 @@ function resolveColumnWidths(
     );
 
     timeWidth = Math.min(MIN_TIME_COLUMN_WIDTH, availableTimeWidth);
-    const metricWidths = Array.from(
+    const visibleMetricWidths = Array.from(
       { length: visibleMetricCount },
       () => MIN_METRIC_COLUMN_WIDTH
     );
@@ -109,7 +113,7 @@ function resolveColumnWidths(
 
     return {
       timeWidth,
-      metricWidths,
+      metricWidths: visibleMetricWidths,
       notesWidth,
       hiddenMetricCount:
         totalMinWidth > contentWidth ? metricCount - visibleMetricCount : 0,
@@ -119,8 +123,12 @@ function resolveColumnWidths(
   return { timeWidth, metricWidths, notesWidth, hiddenMetricCount: 0 };
 }
 
-export function resolveLayout(templateInput: TemplateV1): ResolvedLayout {
+export function resolveLayout(
+  templateInput: TemplateV1,
+  options: ResolveLayoutOptions = {}
+): ResolvedLayout {
   const template = normalizeTemplate(templateInput);
+  const headingFontFamily = options.headingFontFamily ?? PDF_FONT_FAMILY;
   const page = getPageDimensions(template.layout.pageSize, template.layout.orientation);
   const margins = {
     top: PAGE_MARGIN_INCHES.top * POINTS_PER_INCH,
@@ -140,7 +148,7 @@ export function resolveLayout(templateInput: TemplateV1): ResolvedLayout {
     printableBox.width,
     TITLE_FONT_SIZE,
     'bold',
-    PDF_FONT_FAMILY
+    headingFontFamily
   );
   const titleBox = {
     x: printableBox.x,
@@ -183,7 +191,7 @@ export function resolveLayout(templateInput: TemplateV1): ResolvedLayout {
       Math.max(width - CELL_PADDING_X * 2, 1),
       HEADER_FONT_SIZE,
       'bold',
-      PDF_FONT_FAMILY
+      headingFontFamily
     );
     const resolvedColumn = {
       ...column,
@@ -238,9 +246,16 @@ export function resolveLayout(templateInput: TemplateV1): ResolvedLayout {
     MIN_ROW_HEIGHT,
     rawRowHeight
   );
+  const rowsPerPage =
+    rawRowHeight < MIN_ROW_HEIGHT
+      ? Math.max(Math.floor(bodyBox.height / rowHeight), 1)
+      : template.layout.rowsPerPage;
   const rowLines = Array.from(
-    { length: template.layout.rowsPerPage + 1 },
-    (_, index) => bodyBox.y + index * rowHeight
+    { length: rowsPerPage + 1 },
+    (_, index) =>
+      index === rowsPerPage
+        ? bodyBox.y + bodyBox.height
+        : Math.min(bodyBox.y + index * rowHeight, bodyBox.y + bodyBox.height)
   );
 
   const warnings = validateLayout({
@@ -281,7 +296,7 @@ export function resolveLayout(templateInput: TemplateV1): ResolvedLayout {
     bodyBox,
     footerBox,
     columns: resolvedColumns,
-    rowsPerPage: template.layout.rowsPerPage,
+    rowsPerPage,
     rowHeight,
     columnLines,
     rowLines,

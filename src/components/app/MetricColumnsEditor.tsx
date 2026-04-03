@@ -48,13 +48,16 @@ export function MetricColumnsEditor({
     }
     const targetIndex = dropPosition === 'before' ? toIndex : toIndex + 1;
     const finalIndex = from < targetIndex ? targetIndex - 1 : targetIndex;
-    onReorderMetric(from, finalIndex);
+    if (finalIndex !== from) {
+      onReorderMetric(from, finalIndex);
+    }
     clearDrag();
   }
 
   function clearDrag() {
     setDragIndex(null);
     setDropTargetIndex(null);
+    setDropPosition('after');
     dragIndexRef.current = null;
   }
 

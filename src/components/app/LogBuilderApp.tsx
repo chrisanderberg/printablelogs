@@ -1,4 +1,5 @@
 import { useState, useTransition } from 'react';
+import { PREVIEW_HEADING_FONT_FAMILY } from '@/lib/layout/fonts';
 import { resolveLayout } from '@/lib/layout/resolveLayout';
 import { downloadPdf } from '@/lib/pdf/downloadPdf';
 import {
@@ -57,7 +58,9 @@ export function LogBuilderApp() {
   const [downloadError, setDownloadError] = useState<string | null>(null);
   const [isDownloading, setIsDownloading] = useState(false);
   const [isPending, startTransition] = useTransition();
-  const layout = resolveLayout(template);
+  const layout = resolveLayout(template, {
+    headingFontFamily: PREVIEW_HEADING_FONT_FAMILY,
+  });
 
   function updateTemplate(updater: (current: TemplateV1) => TemplateV1) {
     startTransition(() => {

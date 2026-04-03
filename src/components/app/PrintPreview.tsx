@@ -7,6 +7,11 @@ import {
   TITLE_FONT_SIZE,
   TITLE_LINE_HEIGHT,
 } from '@/lib/layout/constants';
+import {
+  PREVIEW_HANDWRITING_FONT_FAMILY,
+  PREVIEW_HEADING_FONT_FAMILY,
+  PREVIEW_UI_FONT_FAMILY,
+} from '@/lib/layout/fonts';
 import { gridStrokeWidths } from '@/lib/layout/resolveLayout';
 import type { ResolvedLayout } from '@/lib/layout/types';
 import { getExampleRows } from '@/lib/preview/exampleData';
@@ -41,7 +46,7 @@ export function PrintPreview({ layout, showExample }: PrintPreviewProps) {
           fontSize={TITLE_FONT_SIZE}
           fontWeight="700"
           fill="var(--board-ink)"
-          fontFamily="'Playfair Display', Georgia, serif"
+          fontFamily={PREVIEW_HEADING_FONT_FAMILY}
         >
           {layout.titleLines.map((line, index) => (
             <tspan
@@ -100,7 +105,7 @@ export function PrintPreview({ layout, showExample }: PrintPreviewProps) {
             fontSize={HEADER_FONT_SIZE}
             fontWeight="700"
             fill="var(--board-ink)"
-            fontFamily="'Playfair Display', Georgia, serif"
+            fontFamily={PREVIEW_HEADING_FONT_FAMILY}
           >
             {column.headerLines.map((line, index) => (
               <tspan
@@ -118,7 +123,7 @@ export function PrintPreview({ layout, showExample }: PrintPreviewProps) {
           y={layout.footerBox.y + FOOTER_HEIGHT - 4}
           fontSize="8.5"
           fill="var(--board-ink-soft)"
-          fontFamily="'Source Sans 3', sans-serif"
+          fontFamily={PREVIEW_UI_FONT_FAMILY}
         >
           {layout.pageSize.toUpperCase()} / {layout.orientation}
         </text>
@@ -146,7 +151,7 @@ export function PrintPreview({ layout, showExample }: PrintPreviewProps) {
                       y={y}
                       fill="var(--board-data)"
                       fontSize={exampleFontSize}
-                      fontFamily="'Caveat', cursive"
+                      fontFamily={PREVIEW_HANDWRITING_FONT_FAMILY}
                       style={{ letterSpacing: '0.01em' }}
                     >
                       {value}
